@@ -127,6 +127,8 @@ project(":core") {
         api "io.github.libktx:ktx-vis:$ktxVersion"
         api "io.github.libktx:ktx-async:$ktxVersion"
         api "io.github.libktx:ktx-style:$ktxVersion"
+        api "io.github.libktx:ktx-box2d:$ktxVersion"
+        api "io.github.libktx:ktx-math:$ktxVersion"
 
     }
 }
