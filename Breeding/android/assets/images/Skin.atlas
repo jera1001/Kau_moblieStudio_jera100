@@ -1,0 +1,90 @@
+
+Skin.png
+size: 4096,2048
+format: RGBA8888
+filter: Nearest,Nearest
+repeat: none
+BadCookie
+  rotate: false
+  xy: 1362, 362
+  size: 512, 480
+  orig: 512, 480
+  offset: 0, 0
+  index: -1
+Ball
+  rotate: false
+  xy: 2782, 490
+  size: 352, 352
+  orig: 352, 352
+  offset: 0, 0
+  index: -1
+Bath
+  rotate: false
+  xy: 1878, 362
+  size: 480, 480
+  orig: 480, 480
+  offset: 0, 0
+  index: -1
+Fishbowl
+  rotate: false
+  xy: 2, 846
+  size: 1920, 1080
+  orig: 1920, 1080
+  offset: 0, 0
+  index: -1
+GoodCookie
+  rotate: false
+  xy: 846, 362
+  size: 512, 480
+  orig: 512, 480
+  offset: 0, 0
+  index: -1
+NomalFood
+  rotate: false
+  xy: 3138, 586
+  size: 352, 256
+  orig: 352, 256
+  offset: 0, 0
+  index: -1
+Steak
+  rotate: false
+  xy: 846, 70
+  size: 560, 288
+  orig: 560, 288
+  offset: 0, 0
+  index: -1
+Susi
+  rotate: false
+  xy: 1410, 70
+  size: 448, 288
+  orig: 448, 288
+  offset: 0, 0
+  index: -1
+Toilet
+  rotate: false
+  xy: 2362, 490
+  size: 416, 352
+  orig: 416, 352
+  offset: 0, 0
+  index: -1
+Trash
+  rotate: false
+  xy: 1862, 70
+  size: 384, 288
+  orig: 384, 288
+  offset: 0, 0
+  index: -1
+back
+  rotate: false
+  xy: 1926, 846
+  size: 1920, 1080
+  orig: 1920, 1080
+  offset: 0, 0
+  index: -1
+character
+  rotate: false
+  xy: 2, 2
+  size: 840, 840
+  orig: 840, 840
+  offset: 0, 0
+  index: -1
