@@ -19,6 +19,8 @@ import com.libktx.game.Mains.Game
 import com.libktx.game.Mains.Menu
 import com.libktx.game.Mains.Objects.Buttons
 import com.libktx.game.Mains.Objects.Drawables
+import com.libktx.game.Mains.assets.GameSkin
+import com.libktx.game.Mains.assets.load
 import ktx.app.KtxGame
 import ktx.assets.toInternalFile
 import ktx.inject.Context
@@ -32,6 +34,7 @@ class Application : KtxGame<Screen>() {
     val assets = AssetManager()
 
     override fun create() {
+        GameSkin.values().forEach { assets.load(it) }
         context.register {
             bindSingleton(TextureAtlas("images/Skin.atlas"))
             bindSingleton<Batch>(SpriteBatch())
@@ -48,6 +51,7 @@ class Application : KtxGame<Screen>() {
         addScreen(context.inject<Menu>())
         addScreen(context.inject<Game>())
         setScreen<Menu>()
+        super.create()
     }
 
     private fun playMusic() {
@@ -80,9 +84,7 @@ class Application : KtxGame<Screen>() {
         button {
             up = skin.getDrawable("buttonUp")
             down = skin.getDrawable("buttonDown")
-        }
-        button(Buttons.toggle(), extend = defaultStyle){
-            Drawables.buttonChecked
+            over = skin.getDrawable("buttonDown")
         }
         window {
             titleFont = skin[defaultStyle]
@@ -92,6 +94,8 @@ class Application : KtxGame<Screen>() {
 
     override fun dispose() {
         context.dispose()
+        assets.dispose()
+        super.dispose()
     }
 
 }

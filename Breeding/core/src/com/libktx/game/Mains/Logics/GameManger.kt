@@ -1,6 +1,5 @@
 package com.libktx.game.Mains.Logics
 
-import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
@@ -8,8 +7,6 @@ import com.badlogic.gdx.graphics.g2d.Batch
 import com.badlogic.gdx.graphics.g2d.TextureRegion
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.scenes.scene2d.ui.Skin
-import com.libktx.game.Mains.EAssets.GameSkin
-import ktx.box2d.createWorld
 import ktx.graphics.use
 import ktx.scene2d.Scene2DSkin
 

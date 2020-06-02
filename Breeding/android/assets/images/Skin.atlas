@@ -6,84 +6,84 @@ filter: Nearest,Nearest
 repeat: none
 BadCookie
   rotate: false
-  xy: 5774, 1402
+  xy: 846, 386
   size: 512, 480
   orig: 512, 480
   offset: 0, 0
   index: -1
 Ball
   rotate: false
-  xy: 1002, 446
+  xy: 1814, 514
   size: 352, 352
   orig: 352, 352
   offset: 0, 0
   index: -1
 Bath
   rotate: false
-  xy: 518, 318
+  xy: 5774, 986
   size: 480, 480
   orig: 480, 480
   offset: 0, 0
   index: -1
 Fishbowl
   rotate: false
-  xy: 1926, 802
+  xy: 1926, 870
   size: 1920, 1080
   orig: 1920, 1080
   offset: 0, 0
   index: -1
 GoodCookie
   rotate: false
-  xy: 2, 318
+  xy: 5774, 1470
   size: 512, 480
   orig: 512, 480
   offset: 0, 0
   index: -1
 NomalFood
   rotate: false
-  xy: 6742, 1626
+  xy: 7242, 1694
   size: 352, 256
   orig: 352, 256
   offset: 0, 0
   index: -1
 Steak
   rotate: false
-  xy: 2, 26
+  xy: 6290, 1662
   size: 560, 288
   orig: 560, 288
   offset: 0, 0
   index: -1
 Susi
   rotate: false
-  xy: 6290, 1594
+  xy: 1362, 578
   size: 448, 288
   orig: 448, 288
   offset: 0, 0
   index: -1
 Toilet
   rotate: false
-  xy: 5774, 1046
+  xy: 846, 30
   size: 416, 352
   orig: 416, 352
   offset: 0, 0
   index: -1
 Trash
   rotate: false
-  xy: 566, 26
+  xy: 6854, 1662
   size: 384, 288
   orig: 384, 288
   offset: 0, 0
   index: -1
 back
   rotate: false
-  xy: 3850, 802
+  xy: 3850, 870
   size: 1920, 1080
   orig: 1920, 1080
   offset: 0, 0
   index: -1
 buttonDown
   rotate: false
-  xy: 5774, 1022
+  xy: 5774, 962
   size: 30, 20
   orig: 30, 20
   offset: 0, 0
@@ -95,9 +95,18 @@ buttonUp
   orig: 30, 20
   offset: 0, 0
   index: -1
+character
+  rotate: false
+  xy: 2, 26
+  size: 840, 840
+  split: 0, 0, 0, 0
+  pad: -1, -1, -1, -1
+  orig: 840, 840
+  offset: 0, 0
+  index: -1
 fishbowl&back
   rotate: false
-  xy: 2, 802
+  xy: 2, 870
   size: 1920, 1080
   orig: 1920, 1080
   offset: 0, 0

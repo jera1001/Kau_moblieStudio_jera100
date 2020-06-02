@@ -1,17 +1,15 @@
 package com.libktx.game.Mains
 
 import com.badlogic.gdx.Gdx
-import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.Color
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.TextureRegion
-import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.scenes.scene2d.*
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable
 import com.libktx.game.Application
-import com.libktx.game.Mains.EAssets.GameSkin
-import com.libktx.game.Mains.EAssets.load
+import com.libktx.game.Mains.assets.GameSkin
+import com.libktx.game.Mains.assets.load
 import ktx.actors.onClickEvent
 import ktx.app.KtxScreen
 import ktx.scene2d.*
@@ -37,17 +35,19 @@ class Menu(
     }
 
     override fun show(){
-        if(application.assets.isFinished){
-            stage.addActor(view)
-            Gdx.input.inputProcessor = stage
-        }else{
-            stage.addActor(view)
-        }
+        stage.addActor(view)
+        Gdx.input.inputProcessor = stage
     }
 
     override fun render(delta: Float) {
-        stage.act(delta)
-        stage.draw()
+        if(application.assets.isFinished){
+            stage.act(delta)
+            stage.draw()
+        }else{
+            stage.act(delta)
+            stage.draw()
+        }
+
     }
 
     override fun hide(){
