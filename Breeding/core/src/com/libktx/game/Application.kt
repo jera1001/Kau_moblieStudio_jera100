@@ -86,9 +86,17 @@ class Application : KtxGame<Screen>() {
             down = skin.getDrawable("buttonDown")
             over = skin.getDrawable("buttonDown")
         }
+        textButton {
+            font = skin[defaultStyle]
+            up = skin.getDrawable("buttonUp")
+            down = skin.getDrawable("buttonDown")
+        }
         window {
             titleFont = skin[defaultStyle]
             stageBackground = skin["fishbowl&back"]
+        }
+        window("clickList"){
+            stageBackground = skin.getDrawable("Menu")
         }
     }
 

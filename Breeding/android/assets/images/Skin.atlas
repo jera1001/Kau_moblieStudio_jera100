@@ -39,6 +39,13 @@ GoodCookie
   orig: 512, 480
   offset: 0, 0
   index: -1
+Menu
+  rotate: false
+  xy: 2170, 666
+  size: 200, 200
+  orig: 200, 200
+  offset: 0, 0
+  index: -1
 NomalFood
   rotate: false
   xy: 7242, 1694
