@@ -56,8 +56,9 @@ class Game(
     private val characterImage = assets.findRegion("character")
     private val character = Rectangle( 800f/2f - 64f/2f, 20f, 120f, 100f) // character Position
     private val foodImage = assets.findRegion("NomalFood")
-    private val careImage = assets.findRegion("Toilet")
+    private val careImage = assets.findRegion("Bath")
     private val food = Rectangle(MathUtils.random(20f, 800f - 100f), 100f, 80f, 48f)
+    private val care = Rectangle(MathUtils.random(20f, 800f - 100f), 100f, 80f, 48f)
 
     // Random moving side
     var xMove: Float = (800f/2f - 64f/2f)
@@ -103,9 +104,7 @@ class Game(
         table {
             foodButton = button {
                 label(text = "Food")
-//                onClick {
-//                    println("Food Clicked")
-//                }
+                onClick { println("Food Clicked") }
             }.cell(width = 120f, height = 80f)
             careButton = button {
                 label(text = "Care")
@@ -126,14 +125,6 @@ class Game(
         }.cell(padLeft = 50f)
     }
 
-    private fun foodOnClick(){
-//        batch.use { batch ->
-//            batch.begin()
-//            batch.draw(foodImage, 100f, 100f, 1000f, 1000f)
-//            batch.end()
-//        }
-    }
-
     override fun render(delta: Float) {
         camera.update()
 
@@ -148,7 +139,13 @@ class Game(
             if(foodButton.isChecked) {
                 batch.draw(foodImage, food.x, food.y, food.width, food.height)
                 food.y -= 30f*delta
-                food.y = MathUtils.clamp(food.y, 23f, 100f)
+                food.y = MathUtils.clamp(food.y, 25f, 100f)
+            }
+
+            if(careButton.isChecked) {
+                batch.draw(careImage, care.x, care.y, care.width, care.height)
+                care.y -= 30f*delta
+                care.y = MathUtils.clamp(care.y, 25f, 100f)
             }
         }
 
@@ -174,6 +171,30 @@ class Game(
                     xMove = randomMove(delta)
                     food.x = MathUtils.random(20f, 800f - 100f)
                     food.y = 100f
+                }
+            }
+        }
+
+        if(careButton.isChecked){
+//            timeToRandomMove = 5f
+            if(character.x > care.x) {
+                character.x -= 200 * delta
+                println("Minus : character.x = ${character.x}, food.x = ${care.x}")
+            }
+            else if(character.x < care.x) {
+                character.x += 200 * delta
+                println("Plus : character.x = ${character.x}, food.x = ${care.x}")
+            }
+            if(character.x - care.x > -5 && character.x - care.x < 5) {
+                character.x = care.x
+                timeToRandomMove -= delta
+
+                println("Clamped : character.x = ${character.x}, food.x = ${care.x}, timeToRandomMove = ${timeToRandomMove}")
+                if(timeToRandomMove < 0) {
+                    careButton.isChecked = false
+                    xMove = randomMove(delta)
+                    care.x = MathUtils.random(20f, 800f - 100f)
+                    care.y = 100f
                 }
             }
         }
