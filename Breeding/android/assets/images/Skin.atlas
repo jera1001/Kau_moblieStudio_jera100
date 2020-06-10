@@ -6,21 +6,21 @@ filter: Nearest,Nearest
 repeat: none
 BadCookie
   rotate: false
-  xy: 846, 386
+  xy: 6578, 1470
   size: 512, 480
   orig: 512, 480
   offset: 0, 0
   index: -1
 Ball
   rotate: false
-  xy: 1814, 514
+  xy: 1846, 514
   size: 352, 352
   orig: 352, 352
   offset: 0, 0
   index: -1
 Bath
   rotate: false
-  xy: 5774, 986
+  xy: 1362, 386
   size: 480, 480
   orig: 480, 480
   offset: 0, 0
@@ -34,49 +34,49 @@ Fishbowl
   index: -1
 GoodCookie
   rotate: false
-  xy: 5774, 1470
+  xy: 846, 386
   size: 512, 480
   orig: 512, 480
   offset: 0, 0
   index: -1
 Menu
   rotate: false
-  xy: 2170, 666
-  size: 200, 200
-  orig: 200, 200
+  xy: 5774, 1150
+  size: 800, 800
+  orig: 800, 800
   offset: 0, 0
   index: -1
 NomalFood
   rotate: false
-  xy: 7242, 1694
+  xy: 5774, 890
   size: 352, 256
   orig: 352, 256
   offset: 0, 0
   index: -1
 Steak
   rotate: false
-  xy: 6290, 1662
+  xy: 846, 94
   size: 560, 288
   orig: 560, 288
   offset: 0, 0
   index: -1
 Susi
   rotate: false
-  xy: 1362, 578
+  xy: 6578, 1178
   size: 448, 288
   orig: 448, 288
   offset: 0, 0
   index: -1
 Toilet
   rotate: false
-  xy: 846, 30
+  xy: 7094, 1598
   size: 416, 352
   orig: 416, 352
   offset: 0, 0
   index: -1
 Trash
   rotate: false
-  xy: 6854, 1662
+  xy: 1410, 94
   size: 384, 288
   orig: 384, 288
   offset: 0, 0
@@ -90,7 +90,7 @@ back
   index: -1
 buttonDown
   rotate: false
-  xy: 5774, 962
+  xy: 846, 70
   size: 30, 20
   orig: 30, 20
   offset: 0, 0

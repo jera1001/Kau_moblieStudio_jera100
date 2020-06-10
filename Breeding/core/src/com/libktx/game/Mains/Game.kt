@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.Touchable.enabled
 import com.badlogic.gdx.scenes.scene2d.ui.*
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle
+import com.badlogic.gdx.utils.Json
 import com.libktx.game.Mains.assets.GameSkin
 import com.libktx.game.Mains.Logics.GameManger
 import com.libktx.game.Mains.Logics.SoundManger
@@ -32,6 +33,7 @@ import ktx.log.*
 import ktx.scene2d.vis.visCheckBox
 import ktx.style.button
 import kotlin.reflect.typeOf
+import ktx.json.*
 
 private val log = logger<Game>()
 
@@ -59,6 +61,7 @@ class Game(
     private val careImage = assets.findRegion("Bath")
     private val food = Rectangle(MathUtils.random(20f, 800f - 100f), 100f, 80f, 48f)
     private val care = Rectangle(MathUtils.random(20f, 800f - 100f), 100f, 80f, 48f)
+
 
     // Random moving side
     var xMove: Float = (800f/2f - 64f/2f)
@@ -118,38 +121,81 @@ class Game(
         touchable = enabled
 
         menuWindow
+
         table {
             trashFoodBtn = button("trashFood") {
                 label("Bad Food").cell(padTop = 150f)
-                onClick { println("Trash Food Drop!") }
+                onClick {
+                    println("Trash Food Drop!")
+                    Character.hungry += 10
+                    Character.happy -= 5
+                    Character.poop += 20
+                }
             }.cell(padTop = -100f, padLeft = -100f, width = 100f, height = 100f)
 
             normalFoodBtn = button("normalFood") {
                 label("Normal Food").cell(padTop = 150f)
-                onClick { println("Normal Food Drop!") }
+                onClick {
+                    println("Normal Food Drop!")
+                    Character.hungry += 15
+                    Character.happy += 5
+                    Character.poop += 15
+                }
             }.cell(padTop = -100f, padLeft = 50f, width = 100f, height = 100f)
 
             steakBtn = button("Steak") {
                 label("Steak").cell(padTop = 150f)
-                onClick { println("Steak Drop!") }
+                onClick {
+                    println("Steak Drop!")
+                    Character.hungry += 25
+                    Character.happy += 15
+                    Character.poop += 30
+                }
             }.cell(padTop = -100f, padLeft = 50f, width = 100f, height = 100f)
-        }.cell(row = true)
+        }.cell(row = true, padTop = 100f)
         table{
             susiBtn = button("Susi") {
                 label("Susi").cell(padTop = 150f)
-                onClick{println("Susi Drop!")}
+                onClick{
+                    println("Susi Drop!")
+                    Character.hungry += 20
+                    Character.happy += 15
+                    Character.poop += 15
+                }
             }.cell(padLeft = -100f, width = 100f, height = 100f)
 
             badCookieBtn = button("badCookie") {
                 label("Cookie").cell(padTop = 150f)
-                onClick{println("Bad Cookie Drop!")}
+                onClick{
+                    println("Bad Cookie Drop!")
+                    Character.hungry += 5
+                    Character.happy += 20
+                    Character.poop += 5
+                    Character.moral -= 10
+                }
             }.cell(padLeft = 50f, width = 100f, height = 100f)
 
             goodCookieBtn = button("goodCookie") {
                 label("Good Cookie").cell(padTop = 150f)
-                onClick{println("Good Cookie Drop!")}
+                onClick{
+                    println("Good Cookie Drop!")
+                    Character.hungry += 5
+                    Character.happy += 25
+                    Character.poop += 5
+                    Character.moral -= 15
+                    println("${Character.hungry}")
+                }
             }.cell(padLeft = 50f, width = 100f, height = 100f)
         }.cell(padTop = 100f, row = true)
+
+        button {
+            label(text = "Close")
+            onClick {
+                println("Close the Window")
+                stage.clear()
+            }
+        }.cell(row = true, padTop = 100f, width = 200f, height = 40f)
+
     }
 
     private fun btnClickEvent(batch: Batch, delta:Float, btn:KButton, image: TextureAtlas.AtlasRegion){
@@ -217,7 +263,51 @@ class Game(
                 onClick { println("Ball Drop!") }
             }.cell(padLeft = 100f, width = 100f, height = 100f)
         }.cell(row = true)
+
+        button {
+            label(text = "Close")
+            onClick {
+                println("Close the Window")
+                stage.clear()
+            }
+        }.cell(row = true, padTop = 100f, width = 200f, height = 40f)
     }
+
+    /*    Status Side    */
+    private val statusTable = scene2d.table {
+        setFillParent(true)
+        camera.update()
+        batch.projectionMatrix = camera.combined
+
+        touchable = enabled
+
+        menuWindow
+
+        button {
+            label(text = "Close")
+            onClick {
+                println("Close the Window")
+                stage.clear()
+            }
+        }.cell(padTop = -400f, width = 200f, height = 40f)
+
+        table {
+            label("Name : ${Character.name}").cell(padLeft = 100f)
+            label("Clean : ${Character.clean}").cell(padTop = 50f, padLeft = -100f)
+            label("Hungry : ${Character.hungry}").cell(padTop = 100f, padLeft = -100f)
+            label("Toilet : ${Character.poop}").cell(padTop = 150f, padLeft = -100f)
+            table {
+                label("Moral : ${Character.moral}  ")
+                label("Smart : ${Character.smart}")
+            }.cell(padTop = 200f, padLeft = -100f)
+            table {
+                label("Happy : ${Character.happy}  ")
+                label("Health : ${Character.health}")
+            }.cell(padTop = 250f, padLeft = -150f)
+            label("Price : ${Character.price} Won").cell(padTop = 300f, padLeft = -200f)
+        }.cell(padTop = -100f, padLeft = -400f, row = true)
+    }
+
     // Button group side
     private val btnGroup = scene2d.table {
         setFillParent(true)
@@ -255,7 +345,11 @@ class Game(
             }.cell(width = 120f, height = 80f, padLeft = -120f, padTop = 450f)
             statusButton = button {
                 label(text = "Status")
-                onClick { println("Status Clicked") }
+                onClick {
+                    println("Status Clicked")
+                    stage.addActor(menuWindow)
+                    stage.addActor(statusTable)
+                }
             }.cell(width = 120f, height = 80f, padLeft = -120f, padTop = 600f)
         }.cell(padLeft = 50f)
     }
