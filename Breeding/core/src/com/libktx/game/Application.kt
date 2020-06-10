@@ -91,11 +91,55 @@ class Application : KtxGame<Screen>() {
             up = skin.getDrawable("buttonUp")
             down = skin.getDrawable("buttonDown")
         }
+
+        /*    Food Button     */
+        button("badCookie") {
+            up = skin.getDrawable("BadCookie")
+            down = skin.getDrawable("BadCookie")
+
+        }
+        button("goodCookie"){
+            up = skin.getDrawable("GoodCookie")
+            down = skin.getDrawable("GoodCookie")
+        }
+        button("normalFood"){
+            up = skin.getDrawable("NomalFood")
+            down = skin.getDrawable("NomalFood")
+        }
+        button("Steak"){
+            up = skin.getDrawable("Steak")
+            down = skin.getDrawable("Steak")
+        }
+        button("Susi"){
+            up = skin.getDrawable("Susi")
+            down = skin.getDrawable("Susi")
+        }
+        button("trashFood"){
+            up = skin.getDrawable("Trash")
+            down = skin.getDrawable("Trash")
+        }
+
+        /*    Care Button    */
+        button("Bath"){
+            up = skin.getDrawable("Bath")
+            down = skin.getDrawable("Bath")
+        }
+        button("Ball"){
+            up = skin.getDrawable("Ball")
+            down = skin.getDrawable("Ball")
+        }
+        button("Toilet"){
+            up = skin.getDrawable("Toilet")
+            down = skin.getDrawable("Toilet")
+        }
+
+
         window {
             titleFont = skin[defaultStyle]
             stageBackground = skin["fishbowl&back"]
         }
         window("clickList"){
+            titleFont = skin[defaultStyle]
             stageBackground = skin.getDrawable("Menu")
         }
     }

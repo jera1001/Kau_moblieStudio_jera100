@@ -1,6 +1,6 @@
 package com.libktx.game
 
-val screenWidth = 800f
-val screenHeight = 480f
+var screenWidth = 800f
+var screenHeight = 480f
 
 val characterAmount = 5
