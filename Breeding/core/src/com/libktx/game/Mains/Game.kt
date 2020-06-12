@@ -1,5 +1,6 @@
 package com.libktx.game.Mains
 
+import com.badlogic.ashley.core.Entity
 import com.badlogic.gdx.assets.loaders.SkinLoader
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
@@ -9,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector3
+import com.badlogic.gdx.net.HttpRequestBuilder
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.Touchable.enabled
 import com.badlogic.gdx.scenes.scene2d.ui.*
@@ -19,12 +21,12 @@ import com.libktx.game.Mains.Logics.GameManger
 import com.libktx.game.Mains.Logics.SoundManger
 import com.libktx.game.Application
 import com.libktx.game.Mains.Logics.entity.Character
+import com.libktx.game.Mains.Logics.entity.Stats
+import com.libktx.game.Mains.Logics.entity.json
 import com.libktx.game.Mains.assets.get
-import ktx.actors.isShown
-import ktx.actors.onClick
-import ktx.actors.onClickEvent
-import ktx.actors.onTouchDown
+import ktx.actors.*
 import ktx.app.KtxScreen
+import ktx.ashley.get
 import ktx.graphics.begin
 import ktx.scene2d.*
 import ktx.style.get
@@ -39,8 +41,7 @@ private val log = logger<Game>()
 
 class Game(
         val stage: Stage,
-        val batch: Batch,
-        val application: Application
+        val batch: Batch
 ) : KtxScreen {
     private val camera = OrthographicCamera().apply { setToOrtho(false, 1000f, 480f) }
     private val soundManger = SoundManger()
@@ -130,6 +131,10 @@ class Game(
                     Character.hungry += 10
                     Character.happy -= 5
                     Character.poop += 20
+                    hungryLabel.txt = "Hungry : ${Character.hungry}"
+                    happyLabel.txt = "Happy : ${Character.happy}  "
+                    poopLabel.txt = "Toilet : ${Character.poop}"
+                    println("Hungry: ${Character.hungry}, Happy: ${Character.happy}, Toilet: ${Character.poop}")
                 }
             }.cell(padTop = -100f, padLeft = -100f, width = 100f, height = 100f)
 
@@ -140,6 +145,10 @@ class Game(
                     Character.hungry += 15
                     Character.happy += 5
                     Character.poop += 15
+                    hungryLabel.txt = "Hungry : ${Character.hungry}"
+                    happyLabel.txt = "Happy : ${Character.happy}  "
+                    poopLabel.txt = "Toilet : ${Character.poop}"
+                    println("Hungry: ${Character.hungry}, Happy: ${Character.happy}, Toilet: ${Character.poop}")
                 }
             }.cell(padTop = -100f, padLeft = 50f, width = 100f, height = 100f)
 
@@ -150,6 +159,10 @@ class Game(
                     Character.hungry += 25
                     Character.happy += 15
                     Character.poop += 30
+                    hungryLabel.txt = "Hungry : ${Character.hungry}"
+                    happyLabel.txt = "Happy : ${Character.happy}  "
+                    poopLabel.txt = "Toilet : ${Character.poop}"
+                    println("Hungry: ${Character.hungry}, Happy: ${Character.happy}, Toilet: ${Character.poop}")
                 }
             }.cell(padTop = -100f, padLeft = 50f, width = 100f, height = 100f)
         }.cell(row = true, padTop = 100f)
@@ -161,6 +174,10 @@ class Game(
                     Character.hungry += 20
                     Character.happy += 15
                     Character.poop += 15
+                    hungryLabel.txt = "Hungry : ${Character.hungry}"
+                    happyLabel.txt = "Happy : ${Character.happy}  "
+                    poopLabel.txt = "Toilet : ${Character.poop}"
+                    println("Hungry: ${Character.hungry}, Happy: ${Character.happy}, Toilet: ${Character.poop}")
                 }
             }.cell(padLeft = -100f, width = 100f, height = 100f)
 
@@ -172,6 +189,11 @@ class Game(
                     Character.happy += 20
                     Character.poop += 5
                     Character.moral -= 10
+                    hungryLabel.txt = "Hungry : ${Character.hungry}"
+                    happyLabel.txt = "Happy : ${Character.happy}  "
+                    poopLabel.txt = "Toilet : ${Character.poop}"
+                    moralLabel.txt = "Moral : ${Character.moral}  "
+                    println("Hungry: ${Character.hungry}, Happy: ${Character.happy}, Toilet: ${Character.poop}, Moral: ${Character.moral}")
                 }
             }.cell(padLeft = 50f, width = 100f, height = 100f)
 
@@ -183,7 +205,11 @@ class Game(
                     Character.happy += 25
                     Character.poop += 5
                     Character.moral -= 15
-                    println("${Character.hungry}")
+                    hungryLabel.txt = "Hungry : ${Character.hungry}"
+                    happyLabel.txt = "Happy : ${Character.happy}  "
+                    poopLabel.txt = "Toilet : ${Character.poop}"
+                    moralLabel.txt = "Moral : ${Character.moral}  "
+                    println("Hungry: ${Character.hungry}, Happy: ${Character.happy}, Toilet: ${Character.poop}, Moral: ${Character.moral}")
                 }
             }.cell(padLeft = 50f, width = 100f, height = 100f)
         }.cell(padTop = 100f, row = true)
@@ -252,15 +278,35 @@ class Game(
         table {
             bathBtn = button("Bath") {
                 label("Bath").cell(padTop = 150f)
-                onClick { println("Bath Drop!") }
+                onClick {
+                    println("Bath Drop!")
+                    if(Character.clean < 90)
+                        Character.clean = 90
+                    else Character.clean = 100
+                    Character.happy += 20
+                    cleanLabel.txt = "Clean : ${Character.clean}"
+                    happyLabel.txt = "Happy : ${Character.happy}  "
+                }
             }.cell(padLeft = -100f, width = 100f, height = 100f)
             toiletBtn = button("Toilet") {
                 label("Toilet").cell(padTop = 150f)
-                onClick { println("Toilet Drop!") }
+                onClick {
+                    println("Toilet Drop!")
+                    Character.poop = 0
+                    Character.happy += 10
+                    poopLabel.txt = "Toilet : ${Character.poop}"
+                    happyLabel.txt = "Happy : ${Character.happy}  "
+                }
             }.cell(padLeft = 100f, width = 100f, height = 100f)
             ballBtn = button("Ball") {
                 label("Ball").cell(padTop = 150f)
-                onClick { println("Ball Drop!") }
+                onClick {
+                    println("Ball Drop!")
+                    Character.health += 10
+                    Character.happy += 5
+                    healthLabel.txt = "Health : ${Character.health}"
+                    happyLabel.txt = "Happy : ${Character.happy}  "
+                }
             }.cell(padLeft = 100f, width = 100f, height = 100f)
         }.cell(row = true)
 
@@ -274,15 +320,22 @@ class Game(
     }
 
     /*    Status Side    */
+    lateinit var cleanLabel: Label
+    lateinit var hungryLabel: Label
+    lateinit var poopLabel: Label
+    lateinit var moralLabel: Label
+    lateinit var smartLabel: Label
+    lateinit var happyLabel: Label
+    lateinit var healthLabel: Label
+    lateinit var priceLabel: Label
+
     private val statusTable = scene2d.table {
         setFillParent(true)
         camera.update()
         batch.projectionMatrix = camera.combined
 
         touchable = enabled
-
         menuWindow
-
         button {
             label(text = "Close")
             onClick {
@@ -291,20 +344,21 @@ class Game(
             }
         }.cell(padTop = -400f, width = 200f, height = 40f)
 
+
         table {
-            label("Name : ${Character.name}").cell(padLeft = 100f)
-            label("Clean : ${Character.clean}").cell(padTop = 50f, padLeft = -100f)
-            label("Hungry : ${Character.hungry}").cell(padTop = 100f, padLeft = -100f)
-            label("Toilet : ${Character.poop}").cell(padTop = 150f, padLeft = -100f)
+            label("Name : ${Character.name}").cell(expand = true, padLeft = 100f)
+            cleanLabel = label("Clean : ${Character.clean}").cell(expand = true, padTop = 50f, padLeft = -100f)
+            hungryLabel = label("Hungry : ${Character.hungry}").cell(expand = true, padTop = 100f, padLeft = -100f)
+            poopLabel = label("Toilet : ${Character.poop}").cell(expand = true, padTop = 150f, padLeft = -100f)
             table {
-                label("Moral : ${Character.moral}  ")
-                label("Smart : ${Character.smart}")
+                moralLabel = label("Moral : ${Character.moral}  ").cell(expand = true)
+                smartLabel = label("Smart : ${Character.smart}").cell(expand = true)
             }.cell(padTop = 200f, padLeft = -100f)
             table {
-                label("Happy : ${Character.happy}  ")
-                label("Health : ${Character.health}")
+                happyLabel = label("Happy : ${Character.happy}  ").cell(expand = true)
+                healthLabel = label("Health : ${Character.health}").cell(expand = true)
             }.cell(padTop = 250f, padLeft = -150f)
-            label("Price : ${Character.price} Won").cell(padTop = 300f, padLeft = -200f)
+            priceLabel = label("Price : ${Character.price} Won").cell(expand = true, padTop = 300f, padLeft = -200f)
         }.cell(padTop = -100f, padLeft = -400f, row = true)
     }
 
@@ -356,7 +410,6 @@ class Game(
 
     override fun render(delta: Float) {
         camera.update()
-
         batch.projectionMatrix = camera.combined
 
         stage.addActor(btnGroup)
@@ -405,8 +458,7 @@ class Game(
     }
 
 //    override fun show() {
-//        stage.addActor(btnGroup)
-//        stage.draw()
+//
 //    }
 }
 

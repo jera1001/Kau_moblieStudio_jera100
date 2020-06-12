@@ -44,7 +44,7 @@ class Application : KtxGame<Screen>() {
             Scene2DSkin.defaultSkin = inject()
             bindSingleton(this@Application)
             bindSingleton(Menu(inject(), inject()))
-            bindSingleton(Game(inject(), inject(), inject()))
+            bindSingleton(Game(inject(), inject()))
         }
 
 //        playMusic()
@@ -146,8 +146,8 @@ class Application : KtxGame<Screen>() {
 
     override fun dispose() {
         context.dispose()
-        assets.dispose()
-        super.dispose()
+//        assets.dispose()
+//        super.dispose()
     }
 
 }
