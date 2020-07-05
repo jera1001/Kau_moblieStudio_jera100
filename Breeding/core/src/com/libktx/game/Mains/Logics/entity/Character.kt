@@ -22,39 +22,4 @@ class Character{
         var health:Int = 50  // 건강
         var price:Int = 1000 // 가격
     }
-//    override fun show(){
-//        super.show()
-//    }
 }
-
-class Stats: Component, Pool.Poolable {
-    var name = "Kuruk"
-    var clean = 100
-    var hungry = 80
-    var poop = 30
-    var moral = 50
-    var smart = 50
-    var happy = 50
-    var health = 50
-    var price = 1000
-
-    companion object{
-        val mapper = mapperFor<Stats>()
-    }
-
-    override fun reset() {
-        name = "Kuruk"
-        clean = 100
-        hungry = 80
-        poop = 30
-        moral = 50
-        smart = 50
-        happy = 50
-        health = 50
-        price = 1000
-    }
-}
-
-//val Entity.Stat: Stats
-//    get() = this[Stats.mapper]
-//            ?: throw KotlinNullPointerException("Trying to access a stats component which is null")

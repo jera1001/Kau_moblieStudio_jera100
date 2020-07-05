@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.net.HttpRequestBuilder
+import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.Touchable.enabled
 import com.badlogic.gdx.scenes.scene2d.ui.*
@@ -21,9 +22,6 @@ import com.libktx.game.Mains.Logics.GameManger
 import com.libktx.game.Mains.Logics.SoundManger
 import com.libktx.game.Application
 import com.libktx.game.Mains.Logics.entity.Character
-import com.libktx.game.Mains.Logics.entity.Stats
-import com.libktx.game.Mains.Logics.entity.json
-import com.libktx.game.Mains.assets.get
 import ktx.actors.*
 import ktx.app.KtxScreen
 import ktx.ashley.get
@@ -41,7 +39,8 @@ private val log = logger<Game>()
 
 class Game(
         val stage: Stage,
-        val batch: Batch
+        val batch: Batch,
+        val application: Application
 ) : KtxScreen {
     private val camera = OrthographicCamera().apply { setToOrtho(false, 1000f, 480f) }
     private val soundManger = SoundManger()
@@ -56,13 +55,18 @@ class Game(
 
     private val assets = TextureAtlas("images/Skin.atlas")
     private val backgroundImage = assets.findRegion("fishbowl&back")
-    private val characterImage = assets.findRegion("character")
-    private val character = Rectangle( 800f/2f - 64f/2f, 20f, 120f, 100f) // character Position
+
     private var foodImage = assets.findRegion("NomalFood")
     private val careImage = assets.findRegion("Bath")
     private val food = Rectangle(MathUtils.random(20f, 800f - 100f), 100f, 80f, 48f)
     private val care = Rectangle(MathUtils.random(20f, 800f - 100f), 100f, 80f, 48f)
 
+    companion object {
+        val assets = TextureAtlas("images/Skin.atlas")
+
+        val characterImage = assets.findRegion("character")
+        val character = Rectangle( 800f/2f - 64f/2f, 20f, 120f, 100f) // character Position
+    }
 
     // Random moving side
     var xMove: Float = (800f/2f - 64f/2f)
@@ -300,7 +304,13 @@ class Game(
             }.cell(padLeft = 100f, width = 100f, height = 100f)
             ballBtn = button("Ball") {
                 label("Ball").cell(padTop = 150f)
+
+//                onClickEvent {
+//                    _, _ -> application.setScreen<BallGame>()
+//                }
                 onClick {
+//                    application.removeScreen<Game>()
+                    application.setScreen<BallGame>()
                     println("Ball Drop!")
                     Character.health += 10
                     Character.happy += 5
@@ -427,7 +437,7 @@ class Game(
 
             btnClickEvent(batch, delta, bathBtn, bathImage)
             btnClickEvent(batch, delta, toiletBtn, toiletImage)
-            btnClickEvent(batch, delta, ballBtn, ballImage)
+//            btnClickEvent(batch, delta, ballBtn, ballImage)
         }
 
         stage.draw()
@@ -441,7 +451,7 @@ class Game(
 
         moveToCreature(delta, bathBtn)
         moveToCreature(delta, toiletBtn)
-        moveToCreature(delta, ballBtn)
+//        moveToCreature(delta, ballBtn)
 
         if(xMove.toInt() > character.x.toInt() && xMove.toInt() != character.x.toInt() && character.x.toInt() <= 800f - 64f){
             character.x += 100*delta

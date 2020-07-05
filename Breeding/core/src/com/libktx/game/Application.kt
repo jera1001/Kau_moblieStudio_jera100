@@ -15,6 +15,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Skin
 import com.badlogic.gdx.scenes.scene2d.ui.Button.ButtonStyle
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.badlogic.gdx.utils.viewport.Viewport
+import com.libktx.game.Mains.BallGame
 import com.libktx.game.Mains.Game
 import com.libktx.game.Mains.Menu
 import com.libktx.game.Mains.Objects.Buttons
@@ -30,7 +31,9 @@ import ktx.style.*
 
 
 class Application : KtxGame<Screen>() {
-    val context = Context()
+    companion object {
+        val context = Context()
+    }
     val assets = AssetManager()
 
     override fun create() {
@@ -44,12 +47,14 @@ class Application : KtxGame<Screen>() {
             Scene2DSkin.defaultSkin = inject()
             bindSingleton(this@Application)
             bindSingleton(Menu(inject(), inject()))
-            bindSingleton(Game(inject(), inject()))
+            bindSingleton(Game(inject(), inject(), inject()))
+            bindSingleton(BallGame(inject(), inject(), inject()))
         }
 
 //        playMusic()
         addScreen(context.inject<Menu>())
         addScreen(context.inject<Game>())
+        addScreen(context.inject<BallGame>())
         setScreen<Menu>()
         super.create()
     }
