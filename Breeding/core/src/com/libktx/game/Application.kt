@@ -1,6 +1,7 @@
 package com.libktx.game
 
 import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Preferences
 import com.badlogic.gdx.Screen
 import com.badlogic.gdx.assets.AssetManager
 import com.badlogic.gdx.graphics.g2d.BitmapFont
@@ -29,10 +30,13 @@ import ktx.inject.register
 import ktx.scene2d.Scene2DSkin
 import ktx.style.*
 
+private const val PREF_NAME = "Breedings"
+
 
 class Application : KtxGame<Screen>() {
     companion object {
         val context = Context()
+        val preferences: Preferences by lazy { Gdx.app.getPreferences(PREF_NAME) }
     }
     val assets = AssetManager()
 

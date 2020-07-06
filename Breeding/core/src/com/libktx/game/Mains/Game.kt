@@ -1,6 +1,8 @@
 package com.libktx.game.Mains
 
 import com.badlogic.ashley.core.Entity
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Preferences
 import com.badlogic.gdx.assets.loaders.SkinLoader
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.Texture
@@ -22,6 +24,9 @@ import com.libktx.game.Mains.Logics.GameManger
 import com.libktx.game.Mains.Logics.SoundManger
 import com.libktx.game.Application
 import com.libktx.game.Mains.Logics.entity.Character
+import com.libktx.game.Mains.Logics.entity.CharacterA
+import com.libktx.game.Mains.Logics.entity.Player
+import com.sun.xml.internal.bind.api.impl.NameConverter.smart
 import ktx.actors.*
 import ktx.app.KtxScreen
 import ktx.ashley.get
@@ -34,18 +39,29 @@ import ktx.scene2d.vis.visCheckBox
 import ktx.style.button
 import kotlin.reflect.typeOf
 import ktx.json.*
+import ktx.preferences.flush
+import ktx.preferences.get
 
 private val log = logger<Game>()
+
 
 class Game(
         val stage: Stage,
         val batch: Batch,
         val application: Application
 ) : KtxScreen {
+//    fun readValuesFromPreferences(){
+//        val preferences = Gdx.app.getPreferences("Breeding")
+//        val player : Player? = preferences["Player"]
+//        val character: CharacterA? = preferences["Character"]
+//    }
     private val camera = OrthographicCamera().apply { setToOrtho(false, 1000f, 480f) }
     private val soundManger = SoundManger()
 //    private val gameManager = createGameManager()
     private val touchPos = Vector3()
+
+    private var newPlayer: Player = Player()
+    private var newCharacter : CharacterA = CharacterA()
 
     val foodButton: KButton
     val careButton: KButton
@@ -155,9 +171,11 @@ class Game(
                     Character.hungry += 10
                     Character.happy -= 5
                     Character.poop += 20
+                    Character.price = ((Character.moral + Character.smart + Character.happy + Character.health) / 4) * 100
                     hungryLabel.txt = "Hungry : ${Character.hungry}"
                     happyLabel.txt = "Happy : ${Character.happy}  "
                     poopLabel.txt = "Toilet : ${Character.poop}"
+                    priceLabel.txt = "Price : ${Character.price} Won"
                     turnDelta++
                     println("Hungry: ${Character.hungry}, Happy: ${Character.happy}, Toilet: ${Character.poop}")
                 }
@@ -170,9 +188,11 @@ class Game(
                     Character.hungry += 15
                     Character.happy += 5
                     Character.poop += 15
+                    Character.price = ((Character.moral + Character.smart + Character.happy + Character.health) / 4) * 100
                     hungryLabel.txt = "Hungry : ${Character.hungry}"
                     happyLabel.txt = "Happy : ${Character.happy}  "
                     poopLabel.txt = "Toilet : ${Character.poop}"
+                    priceLabel.txt = "Price : ${Character.price} Won"
                     turnDelta++
                     println("Hungry: ${Character.hungry}, Happy: ${Character.happy}, Toilet: ${Character.poop}")
                 }
@@ -185,9 +205,11 @@ class Game(
                     Character.hungry += 25
                     Character.happy += 15
                     Character.poop += 30
+                    Character.price = ((Character.moral + Character.smart + Character.happy + Character.health) / 4) * 100
                     hungryLabel.txt = "Hungry : ${Character.hungry}"
                     happyLabel.txt = "Happy : ${Character.happy}  "
                     poopLabel.txt = "Toilet : ${Character.poop}"
+                    priceLabel.txt = "Price : ${Character.price} Won"
                     turnDelta++
                     println("Hungry: ${Character.hungry}, Happy: ${Character.happy}, Toilet: ${Character.poop}")
                 }
@@ -201,9 +223,11 @@ class Game(
                     Character.hungry += 20
                     Character.happy += 15
                     Character.poop += 15
+                    Character.price = ((Character.moral + Character.smart + Character.happy + Character.health) / 4) * 100
                     hungryLabel.txt = "Hungry : ${Character.hungry}"
                     happyLabel.txt = "Happy : ${Character.happy}  "
                     poopLabel.txt = "Toilet : ${Character.poop}"
+                    priceLabel.txt = "Price : ${Character.price} Won"
                     turnDelta++
                     println("Hungry: ${Character.hungry}, Happy: ${Character.happy}, Toilet: ${Character.poop}")
                 }
@@ -217,10 +241,12 @@ class Game(
                     Character.happy += 20
                     Character.poop += 5
                     Character.moral -= 10
+                    Character.price = ((Character.moral + Character.smart + Character.happy + Character.health) / 4) * 100
                     hungryLabel.txt = "Hungry : ${Character.hungry}"
                     happyLabel.txt = "Happy : ${Character.happy}  "
                     poopLabel.txt = "Toilet : ${Character.poop}"
                     moralLabel.txt = "Moral : ${Character.moral}  "
+                    priceLabel.txt = "Price : ${Character.price} Won"
                     turnDelta++
                     println("Hungry: ${Character.hungry}, Happy: ${Character.happy}, Toilet: ${Character.poop}, Moral: ${Character.moral}")
                 }
@@ -234,10 +260,12 @@ class Game(
                     Character.happy += 25
                     Character.poop += 5
                     Character.moral -= 15
+                    Character.price = ((Character.moral + Character.smart + Character.happy + Character.health) / 4) * 100
                     hungryLabel.txt = "Hungry : ${Character.hungry}"
                     happyLabel.txt = "Happy : ${Character.happy}  "
                     poopLabel.txt = "Toilet : ${Character.poop}"
                     moralLabel.txt = "Moral : ${Character.moral}  "
+                    priceLabel.txt = "Price : ${Character.price} Won"
                     turnDelta++
                     println("Hungry: ${Character.hungry}, Happy: ${Character.happy}, Toilet: ${Character.poop}, Moral: ${Character.moral}")
                 }
@@ -315,8 +343,10 @@ class Game(
                         Character.clean = 90
                     else Character.clean = 100
                     Character.happy += 20
+                    Character.price = ((Character.moral + Character.smart + Character.happy + Character.health) / 4) * 100
                     cleanLabel.txt = "Clean : ${Character.clean}"
                     happyLabel.txt = "Happy : ${Character.happy}  "
+                    priceLabel.txt = "Price : ${Character.price} Won"
                 }
             }.cell(padLeft = -100f, width = 100f, height = 100f)
             toiletBtn = button("Toilet") {
@@ -326,8 +356,10 @@ class Game(
                     turnDelta++
                     Character.poop = 0
                     Character.happy += 10
+                    Character.price = ((Character.moral + Character.smart + Character.happy + Character.health) / 4) * 100
                     poopLabel.txt = "Toilet : ${Character.poop}"
                     happyLabel.txt = "Happy : ${Character.happy}  "
+                    priceLabel.txt = "Price : ${Character.price} Won"
                 }
             }.cell(padLeft = 100f, width = 100f, height = 100f)
             ballBtn = button("Ball") {
@@ -338,8 +370,10 @@ class Game(
                     turnDelta++
                     Character.health += 10
                     Character.happy += 5
+                    Character.price = ((Character.moral + Character.smart + Character.happy + Character.health) / 4) * 100
                     healthLabel.txt = "Health : ${Character.health}"
                     happyLabel.txt = "Happy : ${Character.happy}  "
+                    priceLabel.txt = "Price : ${Character.price} Won"
                     application.setScreen<BallGame>()
                 }
             }.cell(padLeft = 100f, width = 100f, height = 100f)
