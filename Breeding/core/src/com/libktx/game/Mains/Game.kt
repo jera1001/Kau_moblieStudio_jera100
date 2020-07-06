@@ -1,67 +1,65 @@
 package com.libktx.game.Mains
 
-import com.badlogic.ashley.core.Entity
-import com.badlogic.gdx.Gdx
 import com.badlogic.gdx.Preferences
-import com.badlogic.gdx.assets.loaders.SkinLoader
 import com.badlogic.gdx.graphics.OrthographicCamera
-import com.badlogic.gdx.graphics.Texture
 import com.badlogic.gdx.graphics.g2d.Batch
-import com.badlogic.gdx.graphics.g2d.SpriteBatch
 import com.badlogic.gdx.graphics.g2d.TextureAtlas
 import com.badlogic.gdx.math.MathUtils
 import com.badlogic.gdx.math.Rectangle
 import com.badlogic.gdx.math.Vector3
-import com.badlogic.gdx.net.HttpRequestBuilder
-import com.badlogic.gdx.scenes.scene2d.InputEvent
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.Touchable.enabled
 import com.badlogic.gdx.scenes.scene2d.ui.*
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton.TextButtonStyle
-import com.badlogic.gdx.utils.Json
-import com.libktx.game.Mains.assets.GameSkin
-import com.libktx.game.Mains.Logics.GameManger
 import com.libktx.game.Mains.Logics.SoundManger
 import com.libktx.game.Application
-import com.libktx.game.Mains.Logics.entity.Character
-import com.libktx.game.Mains.Logics.entity.CharacterA
-import com.libktx.game.Mains.Logics.entity.Player
-import com.sun.xml.internal.bind.api.impl.NameConverter.smart
+import com.libktx.game.Mains.Logics.entity.*
 import ktx.actors.*
 import ktx.app.KtxScreen
-import ktx.ashley.get
-import ktx.graphics.begin
 import ktx.scene2d.*
-import ktx.style.get
 import ktx.graphics.use
 import ktx.log.*
-import ktx.scene2d.vis.visCheckBox
-import ktx.style.button
-import kotlin.reflect.typeOf
-import ktx.json.*
-import ktx.preferences.flush
-import ktx.preferences.get
+import kotlin.AssertionError
 
 private val log = logger<Game>()
-
+val PLAYER_PREF = "Player"
+val CHARACTER_PREF = "Character"
+val FOODNUM_PREF = "foodNum"
 
 class Game(
         val stage: Stage,
         val batch: Batch,
         val application: Application
 ) : KtxScreen {
-//    fun readValuesFromPreferences(){
-//        val preferences = Gdx.app.getPreferences("Breeding")
-//        val player : Player? = preferences["Player"]
-//        val character: CharacterA? = preferences["Character"]
-//    }
     private val camera = OrthographicCamera().apply { setToOrtho(false, 1000f, 480f) }
     private val soundManger = SoundManger()
 //    private val gameManager = createGameManager()
     private val touchPos = Vector3()
 
+    private var preferences: Preferences = Application.preferences
+
+    // Data Load Part //
+    private var _newPlayer: Player? = readPlayerInPreferences(preferences, Player())
     private var newPlayer: Player = Player()
-    private var newCharacter : CharacterA = CharacterA()
+        get(){
+            if(_newPlayer == null) newPlayer = Player()
+            else newPlayer = _newPlayer as Player
+            return _newPlayer ?: throw AssertionError("Set Player Not Null")
+        }
+    private var _newCharacter : Character? = readCharacterInPreferences(preferences, Character())
+    private var newCharacter: Character = Character()
+        get() {
+            if(_newCharacter == null) newCharacter = Character()
+            else newCharacter = _newCharacter as Character
+            return _newCharacter ?: throw AssertionError("Set Character Not Null")
+        }
+    private var _foodNum : FoodNum? = readFoodNumInPreferences(preferences, FoodNum())
+    private var foodNum : FoodNum = FoodNum()
+        get() {
+            if(_foodNum == null) foodNum = FoodNum()
+            else foodNum = _foodNum as FoodNum
+            return _foodNum ?: throw AssertionError("Set FoodNum Not Null")
+        }
+
 
     val foodButton: KButton
     val careButton: KButton
@@ -93,8 +91,8 @@ class Game(
 
     private val playerTable = scene2d.table {
         table {
-            turnLabel = label("Turn : $turn /")
-            ownMoneyLabel = label(" Own Money : $ownMoney Won")
+            turnLabel = label("Turn : ${newPlayer!!.turn} /")
+            ownMoneyLabel = label(" Own Money : ${newPlayer?.ownMoney} Won")
         }.cell(padLeft = 500f, padBottom = 900f)
     }
     // Random moving side
@@ -147,12 +145,12 @@ class Game(
     private val susiBtn: KButton
     private val trashFoodBtn: KButton
 
-    private var badCookieNum = 3
-    private var goodCookieNum = 3
-    private var normalFoodNum = 5
-    private var steakNum = 3
-    private var susiNum = 3
-    private var trashFoodNum = 100
+    lateinit var badCookieLabel: Label
+    lateinit var goodCookieLabel: Label
+    lateinit var normalFoodLabel: Label
+    lateinit var steakLabel: Label
+    lateinit var susiLabel: Label
+    lateinit var trashFoodLabel: Label
 
     private val foodTable = scene2d.table {
         setFillParent(true)
@@ -165,109 +163,121 @@ class Game(
 
         table {
             trashFoodBtn = button("trashFood") {
-                label("Bad Food").cell(padTop = 150f)
+                trashFoodLabel = label("Bad Food : (${foodNum!!.trashFoodNum})").cell(padTop = 150f)
                 onClick {
                     println("Trash Food Drop!")
-                    Character.hungry += 10
-                    Character.happy -= 5
-                    Character.poop += 20
-                    Character.price = ((Character.moral + Character.smart + Character.happy + Character.health) / 4) * 100
-                    hungryLabel.txt = "Hungry : ${Character.hungry}"
-                    happyLabel.txt = "Happy : ${Character.happy}  "
-                    poopLabel.txt = "Toilet : ${Character.poop}"
-                    priceLabel.txt = "Price : ${Character.price} Won"
+                    foodNum!!.trashFoodNum --
+                    newCharacter!!.hungry += 10
+                    newCharacter!!.happy -= 5
+                    newCharacter!!.poop += 20
+                    newCharacter!!.price = ((newCharacter!!.moral + newCharacter!!.smart + newCharacter!!.happy + newCharacter!!.health) / 4) * 100
+                    trashFoodLabel.txt = "Bad Food : (${foodNum!!.trashFoodNum})"
+                    hungryLabel.txt = "Hungry : ${newCharacter!!.hungry}"
+                    happyLabel.txt = "Happy : ${newCharacter!!.happy}  "
+                    poopLabel.txt = "Toilet : ${newCharacter!!.poop}"
+                    priceLabel.txt = "Price : ${newCharacter!!.price} Won"
                     turnDelta++
-                    println("Hungry: ${Character.hungry}, Happy: ${Character.happy}, Toilet: ${Character.poop}")
+                    println("Hungry: ${newCharacter!!.hungry}, Happy: ${newCharacter!!.happy}, Toilet: ${newCharacter!!.poop}")
                 }
             }.cell(padTop = -100f, padLeft = -100f, width = 100f, height = 100f)
 
             normalFoodBtn = button("normalFood") {
-                label("Normal Food").cell(padTop = 150f)
+                normalFoodLabel = label("Normal Food : (${foodNum!!.normalFoodNum})").cell(padTop = 150f)
                 onClick {
                     println("Normal Food Drop!")
-                    Character.hungry += 15
-                    Character.happy += 5
-                    Character.poop += 15
-                    Character.price = ((Character.moral + Character.smart + Character.happy + Character.health) / 4) * 100
-                    hungryLabel.txt = "Hungry : ${Character.hungry}"
-                    happyLabel.txt = "Happy : ${Character.happy}  "
-                    poopLabel.txt = "Toilet : ${Character.poop}"
-                    priceLabel.txt = "Price : ${Character.price} Won"
+                    foodNum!!.normalFoodNum--
+                    newCharacter!!.hungry += 15
+                    newCharacter!!.happy += 5
+                    newCharacter!!.poop += 15
+                    newCharacter!!.price = ((newCharacter!!.moral + newCharacter!!.smart + newCharacter!!.happy + newCharacter!!.health) / 4) * 100
+                    hungryLabel.txt = "Hungry : ${newCharacter!!.hungry}"
+                    happyLabel.txt = "Happy : ${newCharacter!!.happy}  "
+                    poopLabel.txt = "Toilet : ${newCharacter!!.poop}"
+                    priceLabel.txt = "Price : ${newCharacter!!.price} Won"
+                    normalFoodLabel.txt = "Normal Food : (${foodNum!!.normalFoodNum})"
                     turnDelta++
-                    println("Hungry: ${Character.hungry}, Happy: ${Character.happy}, Toilet: ${Character.poop}")
+                    println("Hungry: ${newCharacter!!.hungry}, Happy: ${newCharacter!!.happy}, Toilet: ${newCharacter!!.poop}")
                 }
             }.cell(padTop = -100f, padLeft = 50f, width = 100f, height = 100f)
 
             steakBtn = button("Steak") {
-                label("Steak").cell(padTop = 150f)
+                steakLabel = label("Steak : (${foodNum!!.steakNum})").cell(padTop = 150f)
                 onClick {
                     println("Steak Drop!")
-                    Character.hungry += 25
-                    Character.happy += 15
-                    Character.poop += 30
-                    Character.price = ((Character.moral + Character.smart + Character.happy + Character.health) / 4) * 100
-                    hungryLabel.txt = "Hungry : ${Character.hungry}"
-                    happyLabel.txt = "Happy : ${Character.happy}  "
-                    poopLabel.txt = "Toilet : ${Character.poop}"
-                    priceLabel.txt = "Price : ${Character.price} Won"
+                    foodNum!!.steakNum--
+                    newCharacter!!.hungry += 25
+                    newCharacter!!.happy += 15
+                    newCharacter!!.poop += 30
+                    newCharacter!!.price = ((newCharacter!!.moral + newCharacter!!.smart + newCharacter!!.happy + newCharacter!!.health) / 4) * 100
+                    hungryLabel.txt = "Hungry : ${newCharacter!!.hungry}"
+                    happyLabel.txt = "Happy : ${newCharacter!!.happy}  "
+                    poopLabel.txt = "Toilet : ${newCharacter!!.poop}"
+                    priceLabel.txt = "Price : ${newCharacter!!.price} Won"
+                    steakLabel.txt = "Steak : (${foodNum!!.steakNum})"
                     turnDelta++
-                    println("Hungry: ${Character.hungry}, Happy: ${Character.happy}, Toilet: ${Character.poop}")
+                    println("Hungry: ${newCharacter!!.hungry}, Happy: ${newCharacter!!.happy}, Toilet: ${newCharacter!!.poop}")
                 }
             }.cell(padTop = -100f, padLeft = 50f, width = 100f, height = 100f)
         }.cell(row = true, padTop = 100f)
         table{
             susiBtn = button("Susi") {
-                label("Susi").cell(padTop = 150f)
+                susiLabel = label("Susi : (${foodNum!!.susiNum})").cell(padTop = 150f)
                 onClick{
                     println("Susi Drop!")
-                    Character.hungry += 20
-                    Character.happy += 15
-                    Character.poop += 15
-                    Character.price = ((Character.moral + Character.smart + Character.happy + Character.health) / 4) * 100
-                    hungryLabel.txt = "Hungry : ${Character.hungry}"
-                    happyLabel.txt = "Happy : ${Character.happy}  "
-                    poopLabel.txt = "Toilet : ${Character.poop}"
-                    priceLabel.txt = "Price : ${Character.price} Won"
+                    foodNum!!.susiNum--
+                    newCharacter!!.hungry += 20
+                    newCharacter!!.happy += 15
+                    newCharacter!!.poop += 15
+                    newCharacter!!.price = ((newCharacter!!.moral + newCharacter!!.smart + newCharacter!!.happy + newCharacter!!.health) / 4) * 100
+                    hungryLabel.txt = "Hungry : ${newCharacter!!.hungry}"
+                    happyLabel.txt = "Happy : ${newCharacter!!.happy}  "
+                    poopLabel.txt = "Toilet : ${newCharacter!!.poop}"
+                    priceLabel.txt = "Price : ${newCharacter!!.price} Won"
+                    susiLabel.txt = "Susi : (${foodNum!!.susiNum})"
                     turnDelta++
-                    println("Hungry: ${Character.hungry}, Happy: ${Character.happy}, Toilet: ${Character.poop}")
+                    println("Hungry: ${newCharacter!!.hungry}, Happy: ${newCharacter!!.happy}, Toilet: ${newCharacter!!.poop}")
                 }
             }.cell(padLeft = -100f, width = 100f, height = 100f)
 
             badCookieBtn = button("badCookie") {
-                label("Cookie").cell(padTop = 150f)
+                badCookieLabel = label("Cookie : (${foodNum!!.badCookieNum})").cell(padTop = 150f)
                 onClick{
                     println("Bad Cookie Drop!")
-                    Character.hungry += 5
-                    Character.happy += 20
-                    Character.poop += 5
-                    Character.moral -= 10
-                    Character.price = ((Character.moral + Character.smart + Character.happy + Character.health) / 4) * 100
-                    hungryLabel.txt = "Hungry : ${Character.hungry}"
-                    happyLabel.txt = "Happy : ${Character.happy}  "
-                    poopLabel.txt = "Toilet : ${Character.poop}"
-                    moralLabel.txt = "Moral : ${Character.moral}  "
-                    priceLabel.txt = "Price : ${Character.price} Won"
+                    foodNum!!.badCookieNum--
+                    newCharacter!!.hungry += 5
+                    newCharacter!!.happy += 20
+                    newCharacter!!.poop += 5
+                    newCharacter!!.moral -= 10
+                    newCharacter!!.price = ((newCharacter!!.moral + newCharacter!!.smart + newCharacter!!.happy + newCharacter!!.health) / 4) * 100
+                    hungryLabel.txt = "Hungry : ${newCharacter!!.hungry}"
+                    happyLabel.txt = "Happy : ${newCharacter!!.happy}  "
+                    poopLabel.txt = "Toilet : ${newCharacter!!.poop}"
+                    moralLabel.txt = "Moral : ${newCharacter!!.moral}  "
+                    priceLabel.txt = "Price : ${newCharacter!!.price} Won"
+                    badCookieLabel.txt = "Cookie : (${foodNum!!.badCookieNum})"
                     turnDelta++
-                    println("Hungry: ${Character.hungry}, Happy: ${Character.happy}, Toilet: ${Character.poop}, Moral: ${Character.moral}")
+                    println("Hungry: ${newCharacter!!.hungry}, Happy: ${newCharacter!!.happy}, Toilet: ${newCharacter!!.poop}, Moral: ${newCharacter!!.moral}")
                 }
             }.cell(padLeft = 50f, width = 100f, height = 100f)
 
             goodCookieBtn = button("goodCookie") {
-                label("Good Cookie").cell(padTop = 150f)
+                goodCookieLabel = label("Good Cookie : (${foodNum!!.goodCookieNum})").cell(padTop = 150f)
                 onClick{
                     println("Good Cookie Drop!")
-                    Character.hungry += 5
-                    Character.happy += 25
-                    Character.poop += 5
-                    Character.moral -= 15
-                    Character.price = ((Character.moral + Character.smart + Character.happy + Character.health) / 4) * 100
-                    hungryLabel.txt = "Hungry : ${Character.hungry}"
-                    happyLabel.txt = "Happy : ${Character.happy}  "
-                    poopLabel.txt = "Toilet : ${Character.poop}"
-                    moralLabel.txt = "Moral : ${Character.moral}  "
-                    priceLabel.txt = "Price : ${Character.price} Won"
+                    foodNum!!.goodCookieNum--
+                    newCharacter!!.hungry += 5
+                    newCharacter!!.happy += 25
+                    newCharacter!!.poop += 5
+                    newCharacter!!.moral -= 15
+                    newCharacter!!.price = ((newCharacter!!.moral + newCharacter!!.smart + newCharacter!!.happy + newCharacter!!.health) / 4) * 100
+                    hungryLabel.txt = "Hungry : ${newCharacter!!.hungry}"
+                    happyLabel.txt = "Happy : ${newCharacter!!.happy}  "
+                    poopLabel.txt = "Toilet : ${newCharacter!!.poop}"
+                    moralLabel.txt = "Moral : ${newCharacter!!.moral}  "
+                    priceLabel.txt = "Price : ${newCharacter!!.price} Won"
+                    goodCookieLabel.txt = "Good Cookie : (${foodNum!!.goodCookieNum})"
                     turnDelta++
-                    println("Hungry: ${Character.hungry}, Happy: ${Character.happy}, Toilet: ${Character.poop}, Moral: ${Character.moral}")
+                    println("Hungry: ${newCharacter!!.hungry}, Happy: ${newCharacter!!.happy}, Toilet: ${newCharacter!!.poop}, Moral: ${newCharacter!!.moral}")
                 }
             }.cell(padLeft = 50f, width = 100f, height = 100f)
         }.cell(padTop = 100f, row = true)
@@ -339,14 +349,13 @@ class Game(
                 onClick {
                     println("Bath Drop!")
                     turnDelta++
-                    if(Character.clean < 90)
-                        Character.clean = 90
-                    else Character.clean = 100
-                    Character.happy += 20
-                    Character.price = ((Character.moral + Character.smart + Character.happy + Character.health) / 4) * 100
-                    cleanLabel.txt = "Clean : ${Character.clean}"
-                    happyLabel.txt = "Happy : ${Character.happy}  "
-                    priceLabel.txt = "Price : ${Character.price} Won"
+                    if(newCharacter!!.clean < 90)
+                        newCharacter!!.clean = 90
+                    else newCharacter!!.clean = 100
+                    newCharacter!!.happy += 20
+                    newCharacter!!.price = ((newCharacter!!.moral + newCharacter!!.smart + newCharacter!!.happy + newCharacter!!.health) / 4) * 100
+                    cleanLabel.txt = "Clean : ${newCharacter!!.clean}"
+                    happyLabel.txt = "Happy : ${newCharacter!!.happy}  "
                 }
             }.cell(padLeft = -100f, width = 100f, height = 100f)
             toiletBtn = button("Toilet") {
@@ -354,12 +363,11 @@ class Game(
                 onClick {
                     println("Toilet Drop!")
                     turnDelta++
-                    Character.poop = 0
-                    Character.happy += 10
-                    Character.price = ((Character.moral + Character.smart + Character.happy + Character.health) / 4) * 100
-                    poopLabel.txt = "Toilet : ${Character.poop}"
-                    happyLabel.txt = "Happy : ${Character.happy}  "
-                    priceLabel.txt = "Price : ${Character.price} Won"
+                    newCharacter!!.poop = 0
+                    newCharacter!!.happy += 10
+                    newCharacter!!.price = ((newCharacter!!.moral + newCharacter!!.smart + newCharacter!!.happy + newCharacter!!.health) / 4) * 100
+                    poopLabel.txt = "Toilet : ${newCharacter!!.poop}"
+                    happyLabel.txt = "Happy : ${newCharacter!!.happy}  "
                 }
             }.cell(padLeft = 100f, width = 100f, height = 100f)
             ballBtn = button("Ball") {
@@ -368,12 +376,12 @@ class Game(
                 onClick {
                     println("Ball Drop!")
                     turnDelta++
-                    Character.health += 10
-                    Character.happy += 5
-                    Character.price = ((Character.moral + Character.smart + Character.happy + Character.health) / 4) * 100
-                    healthLabel.txt = "Health : ${Character.health}"
-                    happyLabel.txt = "Happy : ${Character.happy}  "
-                    priceLabel.txt = "Price : ${Character.price} Won"
+                    newCharacter!!.health += 10
+                    newCharacter!!.happy += 5
+                    newCharacter!!.price = ((newCharacter!!.moral + newCharacter!!.smart + newCharacter!!.happy + newCharacter!!.health) / 4) * 100
+                    healthLabel.txt = "Health : ${newCharacter!!.health}"
+                    happyLabel.txt = "Happy : ${newCharacter!!.happy}  "
+                    priceLabel.txt = "Price : ${newCharacter!!.price} Won"
                     application.setScreen<BallGame>()
                 }
             }.cell(padLeft = 100f, width = 100f, height = 100f)
@@ -415,19 +423,19 @@ class Game(
 
 
         table {
-            label("Name : ${Character.name}").cell(expand = true, padLeft = 100f)
-            cleanLabel = label("Clean : ${Character.clean}").cell(expand = true, padTop = 50f, padLeft = -100f)
-            hungryLabel = label("Hungry : ${Character.hungry}").cell(expand = true, padTop = 100f, padLeft = -100f)
-            poopLabel = label("Toilet : ${Character.poop}").cell(expand = true, padTop = 150f, padLeft = -100f)
+            label("Name : ${newCharacter!!.name}").cell(expand = true, padLeft = 100f)
+            cleanLabel = label("Clean : ${newCharacter!!.clean}").cell(expand = true, padTop = 50f, padLeft = -100f)
+            hungryLabel = label("Hungry : ${newCharacter!!.hungry}").cell(expand = true, padTop = 100f, padLeft = -100f)
+            poopLabel = label("Toilet : ${newCharacter!!.poop}").cell(expand = true, padTop = 150f, padLeft = -100f)
             table {
-                moralLabel = label("Moral : ${Character.moral}  ").cell(expand = true)
-                smartLabel = label("Smart : ${Character.smart}").cell(expand = true)
+                moralLabel = label("Moral : ${newCharacter!!.moral}  ").cell(expand = true)
+                smartLabel = label("Smart : ${newCharacter!!.smart}").cell(expand = true)
             }.cell(padTop = 200f, padLeft = -100f)
             table {
-                happyLabel = label("Happy : ${Character.happy}  ").cell(expand = true)
-                healthLabel = label("Health : ${Character.health}").cell(expand = true)
+                happyLabel = label("Happy : ${newCharacter!!.happy}  ").cell(expand = true)
+                healthLabel = label("Health : ${newCharacter!!.health}").cell(expand = true)
             }.cell(padTop = 250f, padLeft = -150f)
-            priceLabel = label("Price : ${Character.price} Won").cell(expand = true, padTop = 300f, padLeft = -200f)
+            priceLabel = label("Price : ${newCharacter!!.price} Won").cell(expand = true, padTop = 300f, padLeft = -200f)
         }.cell(padTop = -100f, padLeft = -400f, row = true)
     }
 
@@ -452,18 +460,20 @@ class Game(
                 label("Bad Food : 0won").cell(padTop = 150f)
                 onClick {
                     println("Bad Food Bought")
-                    trashFoodNum ++
+                    foodNum!!.trashFoodNum ++
+                    trashFoodLabel.txt = "Bad Food : (${foodNum!!.trashFoodNum})"
                 }
             }.cell(padTop = -100f, padLeft = -100f, width = 100f, height = 100f)
 
             strNormalFBtn = button("normalFood") {
                 label("Normal Food : 70won").cell(padTop = 150f)
                 onClick {
-                    if(ownMoney >= 70) {
+                    if(newPlayer!!.ownMoney >= 70) {
                         println("Normal Food Bought")
-                        normalFoodNum++
-                        ownMoney -= 70
-                        ownMoneyLabel.txt = " Own Money : $ownMoney Won"
+                        foodNum!!.normalFoodNum++
+                        newPlayer!!.ownMoney -= 70
+                        ownMoneyLabel.txt = " Own Money : ${newPlayer!!.ownMoney} Won"
+                        normalFoodLabel.txt = "Normal Food : (${foodNum!!.normalFoodNum})"
                     }
 
                 }
@@ -472,11 +482,12 @@ class Game(
             strSteakBtn = button("Steak") {
                 label("Steak : 150won").cell(padTop = 150f)
                 onClick {
-                    if(ownMoney >= 150) {
+                    if(newPlayer!!.ownMoney >= 150) {
                         println("Steak Bought")
-                        steakNum++
-                        ownMoney -= 150
-                        ownMoneyLabel.txt = " Own Money : $ownMoney Won"
+                        foodNum!!.steakNum++
+                        newPlayer!!.ownMoney -= 150
+                        ownMoneyLabel.txt = " Own Money : ${newPlayer!!.ownMoney} Won"
+                        steakLabel.txt = "Steak : (${foodNum!!.steakNum})"
                     }
                 }
             }.cell(padTop = -100f, padLeft = 50f, width = 100f, height = 100f)
@@ -485,11 +496,12 @@ class Game(
             strSusiBtn = button("Susi") {
                 label("Susi : 175won").cell(padTop = 150f)
                 onClick{
-                    if(ownMoney >= 175) {
+                    if(newPlayer!!.ownMoney >= 175) {
                         println("Susi Bought")
-                        susiNum++
-                        ownMoney -= 175
-                        ownMoneyLabel.txt = " Own Money : $ownMoney Won"
+                        foodNum!!.susiNum++
+                        newPlayer!!.ownMoney -= 175
+                        ownMoneyLabel.txt = " Own Money : ${newPlayer!!.ownMoney} Won"
+                        susiLabel.txt = "Susi : (${foodNum!!.susiNum})"
                     }
                 }
             }.cell(padLeft = -100f, width = 100f, height = 100f)
@@ -497,11 +509,12 @@ class Game(
             strBadCookieBtn = button("badCookie") {
                 label("Cookie : 75won").cell(padTop = 150f)
                 onClick{
-                    if(ownMoney >= 75){
+                    if(newPlayer!!.ownMoney >= 75){
                         println("Bad Cookie Bought")
-                        badCookieNum ++
-                        ownMoney -= 75
-                        ownMoneyLabel.txt = " Own Money : $ownMoney Won"
+                        foodNum!!.badCookieNum ++
+                        newPlayer!!.ownMoney -= 75
+                        ownMoneyLabel.txt = " Own Money : ${newPlayer!!.ownMoney} Won"
+                        badCookieLabel.txt = "Cookie : (${foodNum!!.badCookieNum})"
                     }
                 }
             }.cell(padLeft = 50f, width = 100f, height = 100f)
@@ -509,11 +522,12 @@ class Game(
             strGoodCookieBtn = button("goodCookie") {
                 label("Good Cookie : 125won").cell(padTop = 150f)
                 onClick{
-                    if(ownMoney >= 125) {
+                    if(newPlayer!!.ownMoney >= 125) {
                         println("Good Cookie Bought")
-                        goodCookieNum++
-                        ownMoney -= 125
-                        ownMoneyLabel.txt = " Own Money : $ownMoney Won"
+                        foodNum!!.goodCookieNum++
+                        newPlayer!!.ownMoney -= 125
+                        ownMoneyLabel.txt = " Own Money : ${newPlayer!!.ownMoney} Won"
+                        goodCookieLabel.txt = "Good Cookie : (${foodNum!!.goodCookieNum})"
                     }
                 }
             }.cell(padLeft = 50f, width = 100f, height = 100f)
@@ -580,15 +594,19 @@ class Game(
     }
 
     override fun render(delta: Float) {
+//        newPlayer= readPlayerInPreferences(preferences, Player())
+//        newCharacter = readCharacterInPreferences(preferences, Character())
+//        foodNum = readFoodNumInPreferences(preferences, FoodNum())
+
         camera.update()
         batch.projectionMatrix = camera.combined
 
         stage.addActor(playerTable)
         stage.addActor(btnGroup)
         if(turnDelta == 3) {
-            turn ++
+            newPlayer!!.turn ++
             turnDelta = 0
-            turnLabel.txt = "Turn : $turn / "
+            turnLabel.txt = "Turn : ${newPlayer!!.turn} / "
         }
 
         batch.use { batch ->
@@ -632,7 +650,10 @@ class Game(
             xMove = randomMove(delta)
         }
         character.x = MathUtils.clamp(character.x, 20f, 800f - 80f)
+
+        saveDataInPreferences(preferences, newPlayer!!, newCharacter!!, foodNum!!)
     }
+
 
 //    override fun show() {
 //
