@@ -50,7 +50,7 @@ class BallGame(
     private var ballX : Float = 0f
     private var ballY : Float = 0f
     private var ballTouched = 0
-    private lateinit var pointLabel: Label
+    private var pointLabel: Label
     private var deltaX = MathUtils.random(-3f, 3f) * 100
     private var deltaY = MathUtils.random(200f, 400f)
     private var charMove = 0f
@@ -109,10 +109,8 @@ class BallGame(
             if(userBall) {
                 ball.x += delta * deltaX
                 ball.y -= delta * deltaY
-//            if(charMove > 30f)
-                Game.character.x -= (Game.character.x - charMove) / 50
+                Game.character.x -= (Game.character.x - charMove) / 30f
  //                println("character.x = ${ball.x}, charMove = $charMove, moveDelta = ${(Game.character.x - charMove) / 30}")
-//            else Game.character.x -= (Game.character.x - charMove) / 10
             }
             if(charBall) {
                 ball.x += delta * deltaX
@@ -150,64 +148,10 @@ class BallGame(
                     userBall = true
                     deltaX = MathUtils.random(-3f, 3f) * 100
                     deltaY = MathUtils.random(200f, 400f)
-                    charMove = ballX + deltaX*delta*(ballY/(deltaY*delta))
+                    charMove = ballX + deltaX*delta*(ballY/(deltaY*delta)) - 10f
                     println("charMove = $charMove")
                 }
             }
         }
-//        ball.x = MathUtils.clamp(ball.x, 0f, 800f-50f)
-//        ball.y = MathUtils.clamp(ball.y, Game.character.y, 480f-50f)
-//
-//        if(ball.x == 0f || ball.x == 800f-50f){
-//            deltaX *= -1
-////            charMove = ballX + deltaX*delta*(ballY/(deltaY*delta))
-//        }
-//
-//        if(ball.y == 480f-50f || ball.y < 15f){
-//            application.removeScreen<BallGame>()
-//            application.setScreen<Game>()
-//            application.addScreen(Application.context.inject<BallGame>())
-//            isBall = false
-//            ballTouched = 0
-//            pointLabel.txt = "Point = 0"
-//
-//            stage.clear()
-////            application.screen
-//        }
-//
-//        if(userBall) {
-//            ball.x += delta * deltaX
-//            ball.y -= delta * deltaY
-////            if(charMove > 30f)
-//                Game.character.x -= (Game.character.x - charMove) / 50
-////            else Game.character.x -= (Game.character.x - charMove) / 10
-//        }
-//        if(charBall) {
-//            ball.x += delta * deltaX
-//            ball.y += delta * deltaY
-//        }
-//
-//        if(ball.overlaps(Game.character) && userBall){
-//            charBall = true
-//            userBall = false
-//            ballTouched ++
-//            pointLabel.txt = "Point = $ballTouched"
-//            deltaX = MathUtils.random(-2f, 2f) * 100
-//            deltaY = MathUtils.random(200f, 400f)
-//        }
-//
-//        if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) && !userBall) {
-//            if((ball.x - Gdx.input.x.toFloat() >= -3f || ball.x - Gdx.input.x.toFloat() <= 3f) &&
-//                    (ball.y - Gdx.input.y.toFloat() >= -3f || ball.y - Gdx.input.y.toFloat() <= 3f)){
-//                charBall = false
-//                userBall = true
-//                deltaX = MathUtils.random(-3f, 3f) * 100
-//                deltaY = MathUtils.random(200f, 400f)
-//                charMove = ballX + deltaX*delta*(ballY/(deltaY*delta))
-//                println("charMove = $charMove")
-//            }
-//        }
-
-//            batch.draw(ballImage, ball.x, ball.y, ball.width, ball.height)
     }
 }

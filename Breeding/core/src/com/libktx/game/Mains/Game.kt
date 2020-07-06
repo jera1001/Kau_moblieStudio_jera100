@@ -53,6 +53,7 @@ class Game(
     val storeButton: KButton
     val statusButton: KButton
 
+
     private val assets = TextureAtlas("images/Skin.atlas")
     private val backgroundImage = assets.findRegion("fishbowl&back")
 
@@ -68,6 +69,18 @@ class Game(
         val character = Rectangle( 800f/2f - 64f/2f, 20f, 120f, 100f) // character Position
     }
 
+    private var turn = 0
+    private var turnDelta = 0
+    private var ownMoney = 50000
+    lateinit var turnLabel : Label
+    lateinit var ownMoneyLabel : Label
+
+    private val playerTable = scene2d.table {
+        table {
+            turnLabel = label("Turn : $turn /")
+            ownMoneyLabel = label(" Own Money : $ownMoney Won")
+        }.cell(padLeft = 500f, padBottom = 900f)
+    }
     // Random moving side
     var xMove: Float = (800f/2f - 64f/2f)
     val moveOffset = 64f
@@ -118,6 +131,13 @@ class Game(
     private val susiBtn: KButton
     private val trashFoodBtn: KButton
 
+    private var badCookieNum = 3
+    private var goodCookieNum = 3
+    private var normalFoodNum = 5
+    private var steakNum = 3
+    private var susiNum = 3
+    private var trashFoodNum = 100
+
     private val foodTable = scene2d.table {
         setFillParent(true)
         camera.update()
@@ -138,6 +158,7 @@ class Game(
                     hungryLabel.txt = "Hungry : ${Character.hungry}"
                     happyLabel.txt = "Happy : ${Character.happy}  "
                     poopLabel.txt = "Toilet : ${Character.poop}"
+                    turnDelta++
                     println("Hungry: ${Character.hungry}, Happy: ${Character.happy}, Toilet: ${Character.poop}")
                 }
             }.cell(padTop = -100f, padLeft = -100f, width = 100f, height = 100f)
@@ -152,6 +173,7 @@ class Game(
                     hungryLabel.txt = "Hungry : ${Character.hungry}"
                     happyLabel.txt = "Happy : ${Character.happy}  "
                     poopLabel.txt = "Toilet : ${Character.poop}"
+                    turnDelta++
                     println("Hungry: ${Character.hungry}, Happy: ${Character.happy}, Toilet: ${Character.poop}")
                 }
             }.cell(padTop = -100f, padLeft = 50f, width = 100f, height = 100f)
@@ -166,6 +188,7 @@ class Game(
                     hungryLabel.txt = "Hungry : ${Character.hungry}"
                     happyLabel.txt = "Happy : ${Character.happy}  "
                     poopLabel.txt = "Toilet : ${Character.poop}"
+                    turnDelta++
                     println("Hungry: ${Character.hungry}, Happy: ${Character.happy}, Toilet: ${Character.poop}")
                 }
             }.cell(padTop = -100f, padLeft = 50f, width = 100f, height = 100f)
@@ -181,6 +204,7 @@ class Game(
                     hungryLabel.txt = "Hungry : ${Character.hungry}"
                     happyLabel.txt = "Happy : ${Character.happy}  "
                     poopLabel.txt = "Toilet : ${Character.poop}"
+                    turnDelta++
                     println("Hungry: ${Character.hungry}, Happy: ${Character.happy}, Toilet: ${Character.poop}")
                 }
             }.cell(padLeft = -100f, width = 100f, height = 100f)
@@ -197,6 +221,7 @@ class Game(
                     happyLabel.txt = "Happy : ${Character.happy}  "
                     poopLabel.txt = "Toilet : ${Character.poop}"
                     moralLabel.txt = "Moral : ${Character.moral}  "
+                    turnDelta++
                     println("Hungry: ${Character.hungry}, Happy: ${Character.happy}, Toilet: ${Character.poop}, Moral: ${Character.moral}")
                 }
             }.cell(padLeft = 50f, width = 100f, height = 100f)
@@ -213,6 +238,7 @@ class Game(
                     happyLabel.txt = "Happy : ${Character.happy}  "
                     poopLabel.txt = "Toilet : ${Character.poop}"
                     moralLabel.txt = "Moral : ${Character.moral}  "
+                    turnDelta++
                     println("Hungry: ${Character.hungry}, Happy: ${Character.happy}, Toilet: ${Character.poop}, Moral: ${Character.moral}")
                 }
             }.cell(padLeft = 50f, width = 100f, height = 100f)
@@ -284,6 +310,7 @@ class Game(
                 label("Bath").cell(padTop = 150f)
                 onClick {
                     println("Bath Drop!")
+                    turnDelta++
                     if(Character.clean < 90)
                         Character.clean = 90
                     else Character.clean = 100
@@ -296,6 +323,7 @@ class Game(
                 label("Toilet").cell(padTop = 150f)
                 onClick {
                     println("Toilet Drop!")
+                    turnDelta++
                     Character.poop = 0
                     Character.happy += 10
                     poopLabel.txt = "Toilet : ${Character.poop}"
@@ -305,17 +333,14 @@ class Game(
             ballBtn = button("Ball") {
                 label("Ball").cell(padTop = 150f)
 
-//                onClickEvent {
-//                    _, _ -> application.setScreen<BallGame>()
-//                }
                 onClick {
-//                    application.removeScreen<Game>()
-                    application.setScreen<BallGame>()
                     println("Ball Drop!")
+                    turnDelta++
                     Character.health += 10
                     Character.happy += 5
                     healthLabel.txt = "Health : ${Character.health}"
                     happyLabel.txt = "Happy : ${Character.happy}  "
+                    application.setScreen<BallGame>()
                 }
             }.cell(padLeft = 100f, width = 100f, height = 100f)
         }.cell(row = true)
@@ -372,6 +397,103 @@ class Game(
         }.cell(padTop = -100f, padLeft = -400f, row = true)
     }
 
+    private val strBadCookieBtn: KButton
+    private val strGoodCookieBtn: KButton
+    private val strNormalFBtn: KButton
+    private val strSteakBtn: KButton
+    private val strSusiBtn: KButton
+    private val strTrashFBtn: KButton
+
+    private val storeTable = scene2d.table {
+        setFillParent(true)
+        camera.update()
+        batch.projectionMatrix = camera.combined
+
+        touchable = enabled
+
+        menuWindow
+
+        table {
+            strTrashFBtn = button("trashFood") {
+                label("Bad Food : 0won").cell(padTop = 150f)
+                onClick {
+                    println("Bad Food Bought")
+                    trashFoodNum ++
+                }
+            }.cell(padTop = -100f, padLeft = -100f, width = 100f, height = 100f)
+
+            strNormalFBtn = button("normalFood") {
+                label("Normal Food : 70won").cell(padTop = 150f)
+                onClick {
+                    if(ownMoney >= 70) {
+                        println("Normal Food Bought")
+                        normalFoodNum++
+                        ownMoney -= 70
+                        ownMoneyLabel.txt = " Own Money : $ownMoney Won"
+                    }
+
+                }
+            }.cell(padTop = -100f, padLeft = 50f, width = 100f, height = 100f)
+
+            strSteakBtn = button("Steak") {
+                label("Steak : 150won").cell(padTop = 150f)
+                onClick {
+                    if(ownMoney >= 150) {
+                        println("Steak Bought")
+                        steakNum++
+                        ownMoney -= 150
+                        ownMoneyLabel.txt = " Own Money : $ownMoney Won"
+                    }
+                }
+            }.cell(padTop = -100f, padLeft = 50f, width = 100f, height = 100f)
+        }.cell(row = true, padTop = 100f)
+        table{
+            strSusiBtn = button("Susi") {
+                label("Susi : 175won").cell(padTop = 150f)
+                onClick{
+                    if(ownMoney >= 175) {
+                        println("Susi Bought")
+                        susiNum++
+                        ownMoney -= 175
+                        ownMoneyLabel.txt = " Own Money : $ownMoney Won"
+                    }
+                }
+            }.cell(padLeft = -100f, width = 100f, height = 100f)
+
+            strBadCookieBtn = button("badCookie") {
+                label("Cookie : 75won").cell(padTop = 150f)
+                onClick{
+                    if(ownMoney >= 75){
+                        println("Bad Cookie Bought")
+                        badCookieNum ++
+                        ownMoney -= 75
+                        ownMoneyLabel.txt = " Own Money : $ownMoney Won"
+                    }
+                }
+            }.cell(padLeft = 50f, width = 100f, height = 100f)
+
+            strGoodCookieBtn = button("goodCookie") {
+                label("Good Cookie : 125won").cell(padTop = 150f)
+                onClick{
+                    if(ownMoney >= 125) {
+                        println("Good Cookie Bought")
+                        goodCookieNum++
+                        ownMoney -= 125
+                        ownMoneyLabel.txt = " Own Money : $ownMoney Won"
+                    }
+                }
+            }.cell(padLeft = 50f, width = 100f, height = 100f)
+        }.cell(padTop = 100f, row = true)
+
+        button {
+            label(text = "Close")
+            onClick {
+                println("Close the Window")
+                stage.clear()
+            }
+        }.cell(row = true, padTop = 100f, width = 200f, height = 40f)
+    }
+
     // Button group side
     private val btnGroup = scene2d.table {
         setFillParent(true)
@@ -405,7 +527,12 @@ class Game(
             }.cell(width = 120f, height = 80f, padLeft = -120f, padTop = 300f)
             storeButton = button {
                 label(text = "Store")
-                onClick { println("Store Clicked") }
+                onClick {
+                    println("Store Clicked")
+                    stage.addActor(menuWindow)
+                    stage.addActor(storeTable)
+                    turnDelta ++
+                }
             }.cell(width = 120f, height = 80f, padLeft = -120f, padTop = 450f)
             statusButton = button {
                 label(text = "Status")
@@ -422,7 +549,13 @@ class Game(
         camera.update()
         batch.projectionMatrix = camera.combined
 
+        stage.addActor(playerTable)
         stage.addActor(btnGroup)
+        if(turnDelta == 3) {
+            turn ++
+            turnDelta = 0
+            turnLabel.txt = "Turn : $turn / "
+        }
 
         batch.use { batch ->
             batch.draw(backgroundImage, 0f, 0f, 800f, 480f)

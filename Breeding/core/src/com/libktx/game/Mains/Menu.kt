@@ -17,7 +17,7 @@ import ktx.scene2d.*
 class Menu(
         val stage: Stage,
         val application: Application) : KtxScreen {
-    private val camera = OrthographicCamera().apply { setToOrtho(false, 800f, 480f) }
+    private val camera = OrthographicCamera().apply { setToOrtho(false, 1920f, 1080f) }
     private val backgroundImage = Texture("back.png")
     private val view = scene2d.table {
         setFillParent(true)
