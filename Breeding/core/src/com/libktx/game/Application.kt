@@ -17,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Button.ButtonStyle
 import com.badlogic.gdx.utils.viewport.ScreenViewport
 import com.badlogic.gdx.utils.viewport.Viewport
 import com.libktx.game.Mains.BallGame
+import com.libktx.game.Mains.CleanGame
 import com.libktx.game.Mains.Game
 import com.libktx.game.Mains.Menu
 import com.libktx.game.Mains.Objects.Buttons
@@ -53,18 +54,20 @@ class Application : KtxGame<Screen>() {
             bindSingleton(Menu(inject(), inject()))
             bindSingleton(Game(inject(), inject(), inject()))
             bindSingleton(BallGame(inject(), inject(), inject()))
+            bindSingleton(CleanGame(inject(), inject(), inject()))
         }
 
 //        playMusic()
         addScreen(context.inject<Menu>())
         addScreen(context.inject<Game>())
         addScreen(context.inject<BallGame>())
+        addScreen(context.inject<CleanGame>())
         setScreen<Menu>()
         super.create()
     }
 
     private fun playMusic() {
-        Gdx.audio.newMusic("music/rain.mp3".toInternalFile()).apply {
+        Gdx.audio.newMusic("music/00031.mp3".toInternalFile()).apply {
             volume = 0.3f
             setOnCompletionListener { play() }
         }.play()

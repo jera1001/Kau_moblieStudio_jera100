@@ -42,6 +42,7 @@ class BallGame(
     private val balls = Array<Rectangle>()
 //    private var ball = Rectangle()
     private val touchPos = Vector3()
+    private val ballSound = Gdx.audio.newSound(Gdx.files.internal("sounds/drop.wav"))
 
     private var isBall:Boolean = false
     private var userBall:Boolean = true
@@ -88,9 +89,6 @@ class BallGame(
 //                println("touch X = ${Gdx.input.x}, Y = ${Gdx.input.y}")
                 balls.forEach { ball -> batch.draw(ballImage, ball.x, ball.y, 50f, 50f) }
             }
-            else{
-
-            }
         }
         stage.draw()
 
@@ -124,6 +122,7 @@ class BallGame(
                 pointLabel.txt = "Point = $ballTouched"
                 deltaX = MathUtils.random(-2f, 2f) * 100
                 deltaY = MathUtils.random(200f, 400f)
+                ballSound.play()
             }
             else if(ball.y > 480f-50f || ball.y < 18f){
                 application.removeScreen<BallGame>()
@@ -149,6 +148,7 @@ class BallGame(
                     deltaX = MathUtils.random(-3f, 3f) * 100
                     deltaY = MathUtils.random(200f, 400f)
                     charMove = ballX + deltaX*delta*(ballY/(deltaY*delta)) - 10f
+                    ballSound.play()
                     println("charMove = $charMove")
                 }
             }

@@ -1,5 +1,7 @@
 package com.libktx.game.Mains
 
+import com.badlogic.gdx.Gdx
+import com.badlogic.gdx.Input
 import com.badlogic.gdx.Preferences
 import com.badlogic.gdx.graphics.OrthographicCamera
 import com.badlogic.gdx.graphics.g2d.Batch
@@ -10,14 +12,17 @@ import com.badlogic.gdx.math.Vector3
 import com.badlogic.gdx.scenes.scene2d.Stage
 import com.badlogic.gdx.scenes.scene2d.Touchable.enabled
 import com.badlogic.gdx.scenes.scene2d.ui.*
+import com.badlogic.gdx.utils.Array
 import com.libktx.game.Mains.Logics.SoundManger
 import com.libktx.game.Application
 import com.libktx.game.Mains.Logics.entity.*
 import ktx.actors.*
 import ktx.app.KtxScreen
+import ktx.collections.iterate
 import ktx.scene2d.*
 import ktx.graphics.use
 import ktx.log.*
+import org.w3c.dom.css.Rect
 import kotlin.AssertionError
 
 private val log = logger<Game>()
@@ -34,6 +39,7 @@ class Game(
     private val soundManger = SoundManger()
 //    private val gameManager = createGameManager()
     private val touchPos = Vector3()
+    private val dropSound = Gdx.audio.newSound(Gdx.files.internal("sounds/drop.wav"))
 
     private var preferences: Preferences = Application.preferences
 
@@ -61,11 +67,11 @@ class Game(
         }
 
 
-    val foodButton: KButton
-    val careButton: KButton
-    val teachButton: KButton
-    val storeButton: KButton
-    val statusButton: KButton
+    private val foodButton: KButton
+    private val careButton: KButton
+    private val teachButton: KButton
+    private val storeButton: KButton
+    private val statusButton: KButton
 
 
     private val assets = TextureAtlas("images/Skin.atlas")
@@ -86,8 +92,8 @@ class Game(
 //    private var turn = 0
     private var turnDelta = 0
 //    private var ownMoney = 50000
-    lateinit var turnLabel : Label
-    lateinit var ownMoneyLabel : Label
+    private var turnLabel : Label
+    private var ownMoneyLabel : Label
 
     private val playerTable = scene2d.table {
         table {
@@ -145,12 +151,12 @@ class Game(
     private val susiBtn: KButton
     private val trashFoodBtn: KButton
 
-    lateinit var badCookieLabel: Label
-    lateinit var goodCookieLabel: Label
-    lateinit var normalFoodLabel: Label
-    lateinit var steakLabel: Label
-    lateinit var susiLabel: Label
-    lateinit var trashFoodLabel: Label
+    private var badCookieLabel: Label
+    private var goodCookieLabel: Label
+    private var normalFoodLabel: Label
+    private var steakLabel: Label
+    private var susiLabel: Label
+    private var trashFoodLabel: Label
 
     private val foodTable = scene2d.table {
         setFillParent(true)
@@ -166,9 +172,12 @@ class Game(
                 trashFoodLabel = label("Bad Food : (${foodNum!!.trashFoodNum})").cell(padTop = 150f)
                 onClick {
                     println("Trash Food Drop!")
+                    dropSound.play()
                     foodNum!!.trashFoodNum --
                     newCharacter!!.hungry -= 10
                     newCharacter!!.happy -= 5
+                    newCharacter!!.hungry = MathUtils.clamp(newCharacter!!.hungry, 0, 1000)
+                    newCharacter!!.happy = MathUtils.clamp(newCharacter!!.happy, 0, 1000)
                     newCharacter!!.poop += 20
                     newCharacter!!.price = ((newCharacter!!.moral + newCharacter!!.smart + newCharacter!!.happy + newCharacter!!.health) / 4) * 100
                     trashFoodLabel.txt = "Bad Food : (${foodNum!!.trashFoodNum})"
@@ -186,9 +195,12 @@ class Game(
                 normalFoodLabel = label("Normal Food : (${foodNum!!.normalFoodNum})").cell(padTop = 150f)
                 onClick {
                     println("Normal Food Drop!")
+                    dropSound.play()
                     foodNum!!.normalFoodNum--
                     newCharacter!!.hungry -= 15
                     newCharacter!!.happy += 5
+                    newCharacter!!.hungry = MathUtils.clamp(newCharacter!!.hungry, 0, 1000)
+                    newCharacter!!.happy = MathUtils.clamp(newCharacter!!.happy, 0, 1000)
                     newCharacter!!.poop += 15
                     newCharacter!!.price = ((newCharacter!!.moral + newCharacter!!.smart + newCharacter!!.happy + newCharacter!!.health) / 4) * 100
                     hungryLabel.txt = "Hungry : ${newCharacter!!.hungry}"
@@ -206,9 +218,12 @@ class Game(
                 steakLabel = label("Steak : (${foodNum!!.steakNum})").cell(padTop = 150f)
                 onClick {
                     println("Steak Drop!")
+                    dropSound.play()
                     foodNum!!.steakNum--
                     newCharacter!!.hungry -= 25
                     newCharacter!!.happy += 15
+                    newCharacter!!.hungry = MathUtils.clamp(newCharacter!!.hungry, 0, 1000)
+                    newCharacter!!.happy = MathUtils.clamp(newCharacter!!.happy, 0, 1000)
                     newCharacter!!.poop += 30
                     newCharacter!!.price = ((newCharacter!!.moral + newCharacter!!.smart + newCharacter!!.happy + newCharacter!!.health) / 4) * 100
                     hungryLabel.txt = "Hungry : ${newCharacter!!.hungry}"
@@ -227,9 +242,12 @@ class Game(
                 susiLabel = label("Susi : (${foodNum!!.susiNum})").cell(padTop = 150f)
                 onClick{
                     println("Susi Drop!")
+                    dropSound.play()
                     foodNum!!.susiNum--
                     newCharacter!!.hungry -= 20
                     newCharacter!!.happy += 15
+                    newCharacter!!.hungry = MathUtils.clamp(newCharacter!!.hungry, 0, 1000)
+                    newCharacter!!.happy = MathUtils.clamp(newCharacter!!.happy, 0, 1000)
                     newCharacter!!.poop += 15
                     newCharacter!!.price = ((newCharacter!!.moral + newCharacter!!.smart + newCharacter!!.happy + newCharacter!!.health) / 4) * 100
                     hungryLabel.txt = "Hungry : ${newCharacter!!.hungry}"
@@ -247,9 +265,12 @@ class Game(
                 badCookieLabel = label("Cookie : (${foodNum!!.badCookieNum})").cell(padTop = 150f)
                 onClick{
                     println("Bad Cookie Drop!")
+                    dropSound.play()
                     foodNum!!.badCookieNum--
                     newCharacter!!.hungry -= 5
                     newCharacter!!.happy += 20
+                    newCharacter!!.hungry = MathUtils.clamp(newCharacter!!.hungry, 0, 1000)
+                    newCharacter!!.happy = MathUtils.clamp(newCharacter!!.happy, 0, 1000)
                     newCharacter!!.poop += 5
                     newCharacter!!.moral -= 10
                     newCharacter!!.price = ((newCharacter!!.moral + newCharacter!!.smart + newCharacter!!.happy + newCharacter!!.health) / 4) * 100
@@ -269,9 +290,12 @@ class Game(
                 goodCookieLabel = label("Good Cookie : (${foodNum!!.goodCookieNum})").cell(padTop = 150f)
                 onClick{
                     println("Good Cookie Drop!")
+                    dropSound.play()
                     foodNum!!.goodCookieNum--
                     newCharacter!!.hungry -= 5
                     newCharacter!!.happy += 25
+                    newCharacter!!.hungry = MathUtils.clamp(newCharacter!!.hungry, 0, 1000)
+                    newCharacter!!.happy = MathUtils.clamp(newCharacter!!.happy, 0, 1000)
                     newCharacter!!.poop += 5
                     newCharacter!!.moral -= 15
                     newCharacter!!.price = ((newCharacter!!.moral + newCharacter!!.smart + newCharacter!!.happy + newCharacter!!.health) / 4) * 100
@@ -354,24 +378,32 @@ class Game(
                 label("Bath").cell(padTop = 150f)
                 onClick {
                     println("Bath Drop!")
+                    dropSound.play()
                     turnDelta++
                     if(newCharacter!!.clean < 90)
                         newCharacter!!.clean = 90
                     else newCharacter!!.clean = 100
                     newCharacter!!.happy += 20
+                    newCharacter!!.moral += 15
+                    newCharacter!!.happy = MathUtils.clamp(newCharacter!!.happy, 0, 1000)
                     newCharacter!!.price = ((newCharacter!!.moral + newCharacter!!.smart + newCharacter!!.happy + newCharacter!!.health) / 4) * 100
+                    moralLabel.txt = "Moral : ${newCharacter!!.moral}  "
                     cleanLabel.txt = "Clean : ${newCharacter!!.clean}"
                     happyLabel.txt = "Happy : ${newCharacter!!.happy}  "
                     turnLabel.txt = "Turn : ${turnDelta}||${newPlayer!!.turn} / "
+
+                    application.setScreen<CleanGame>()
                 }
             }.cell(padLeft = -100f, width = 100f, height = 100f)
             toiletBtn = button("Toilet") {
                 label("Toilet").cell(padTop = 150f)
                 onClick {
                     println("Toilet Drop!")
+                    dropSound.play()
                     turnDelta++
                     newCharacter!!.poop = 0
                     newCharacter!!.happy += 10
+                    newCharacter!!.happy = MathUtils.clamp(newCharacter!!.happy, 0, 1000)
                     newCharacter!!.price = ((newCharacter!!.moral + newCharacter!!.smart + newCharacter!!.happy + newCharacter!!.health) / 4) * 100
                     poopLabel.txt = "Toilet : ${newCharacter!!.poop}"
                     happyLabel.txt = "Happy : ${newCharacter!!.happy}  "
@@ -383,9 +415,11 @@ class Game(
 
                 onClick {
                     println("Ball Drop!")
+                    dropSound.play()
                     turnDelta++
                     newCharacter!!.health += 10
                     newCharacter!!.happy += 5
+                    newCharacter!!.happy = MathUtils.clamp(newCharacter!!.happy, 0, 1000)
                     newCharacter!!.price = ((newCharacter!!.moral + newCharacter!!.smart + newCharacter!!.happy + newCharacter!!.health) / 4) * 100
                     healthLabel.txt = "Health : ${newCharacter!!.health}"
                     happyLabel.txt = "Happy : ${newCharacter!!.happy}  "
@@ -407,14 +441,14 @@ class Game(
     }
 
     /*    Status Side    */
-    lateinit var cleanLabel: Label
-    lateinit var hungryLabel: Label
-    lateinit var poopLabel: Label
-    lateinit var moralLabel: Label
-    lateinit var smartLabel: Label
-    lateinit var happyLabel: Label
-    lateinit var healthLabel: Label
-    lateinit var priceLabel: Label
+    private var cleanLabel: Label
+    private var hungryLabel: Label
+    private var poopLabel: Label
+    private var moralLabel: Label
+    private var smartLabel: Label
+    private var happyLabel: Label
+    private var healthLabel: Label
+    private var priceLabel: Label
 
     private val statusTable = scene2d.table {
         setFillParent(true)
@@ -470,6 +504,7 @@ class Game(
                 label("Bad Food : 0won").cell(padTop = 150f)
                 onClick {
                     println("Bad Food Bought")
+                    dropSound.play()
                     foodNum!!.trashFoodNum ++
                     trashFoodLabel.txt = "Bad Food : (${foodNum!!.trashFoodNum})"
                 }
@@ -478,8 +513,10 @@ class Game(
             strNormalFBtn = button("normalFood") {
                 label("Normal Food : 70won").cell(padTop = 150f)
                 onClick {
+                    dropSound.play()
                     if(newPlayer!!.ownMoney >= 70) {
                         println("Normal Food Bought")
+                        dropSound.play()
                         foodNum!!.normalFoodNum++
                         newPlayer!!.ownMoney -= 70
                         ownMoneyLabel.txt = " Own Money : ${newPlayer!!.ownMoney} Won"
@@ -492,8 +529,10 @@ class Game(
             strSteakBtn = button("Steak") {
                 label("Steak : 150won").cell(padTop = 150f)
                 onClick {
+                    dropSound.play()
                     if(newPlayer!!.ownMoney >= 150) {
                         println("Steak Bought")
+                        dropSound.play()
                         foodNum!!.steakNum++
                         newPlayer!!.ownMoney -= 150
                         ownMoneyLabel.txt = " Own Money : ${newPlayer!!.ownMoney} Won"
@@ -506,8 +545,10 @@ class Game(
             strSusiBtn = button("Susi") {
                 label("Susi : 175won").cell(padTop = 150f)
                 onClick{
+                    dropSound.play()
                     if(newPlayer!!.ownMoney >= 175) {
                         println("Susi Bought")
+                        dropSound.play()
                         foodNum!!.susiNum++
                         newPlayer!!.ownMoney -= 175
                         ownMoneyLabel.txt = " Own Money : ${newPlayer!!.ownMoney} Won"
@@ -519,8 +560,10 @@ class Game(
             strBadCookieBtn = button("badCookie") {
                 label("Cookie : 75won").cell(padTop = 150f)
                 onClick{
+                    dropSound.play()
                     if(newPlayer!!.ownMoney >= 75){
                         println("Bad Cookie Bought")
+                        dropSound.play()
                         foodNum!!.badCookieNum ++
                         newPlayer!!.ownMoney -= 75
                         ownMoneyLabel.txt = " Own Money : ${newPlayer!!.ownMoney} Won"
@@ -532,8 +575,10 @@ class Game(
             strGoodCookieBtn = button("goodCookie") {
                 label("Good Cookie : 125won").cell(padTop = 150f)
                 onClick{
+                    dropSound.play()
                     if(newPlayer!!.ownMoney >= 125) {
                         println("Good Cookie Bought")
+                        dropSound.play()
                         foodNum!!.goodCookieNum++
                         newPlayer!!.ownMoney -= 125
                         ownMoneyLabel.txt = " Own Money : ${newPlayer!!.ownMoney} Won"
@@ -550,6 +595,26 @@ class Game(
                 stage.clear()
             }
         }.cell(row = true, padTop = 100f, width = 200f, height = 40f)
+    }
+
+    private val bookBtn: KButton
+
+    private val teachTable = scene2d.table{
+        setFillParent(true)
+        camera.update()
+        batch.projectionMatrix = camera.combined
+
+        touchable = enabled
+
+        menuWindow
+
+        bookBtn = button {
+            label(text = "Close")
+            onClick {
+                println("Close the Window")
+                stage.clear()
+            }
+        }
     }
 
     // Button group side
@@ -603,6 +668,11 @@ class Game(
         }.cell(padLeft = 50f)
     }
 
+
+    private val poops = Array<Rectangle>()
+    private val poopImage = assets.findRegion("buttonUp")
+    private var ispoop = false
+
     override fun render(delta: Float) {
 //        newPlayer= readPlayerInPreferences(preferences, Player())
 //        newCharacter = readCharacterInPreferences(preferences, Character())
@@ -625,6 +695,13 @@ class Game(
             ownMoneyLabel.txt = " Own Money : ${newPlayer!!.ownMoney} Won"
         }
 
+        if(newCharacter!!.poop > 95) {
+            poops.add(Rectangle(MathUtils.random(40f, 730f), character.y, 20f,20f))
+            println("Poop Added")
+        }
+
+
+
         batch.use { batch ->
             batch.draw(backgroundImage, 0f, 0f, 800f, 480f)
             batch.draw(characterImage, character.x, character.y, character.width, character.height)
@@ -636,10 +713,31 @@ class Game(
             btnClickEvent(batch, delta, badCookieBtn, badCookie)
             btnClickEvent(batch, delta, goodCookieBtn, goodCookie)
 
-            btnClickEvent(batch, delta, bathBtn, bathImage)
+//            btnClickEvent(batch, delta, bathBtn, bathImage)
             btnClickEvent(batch, delta, toiletBtn, toiletImage)
-//            btnClickEvent(batch, delta, ballBtn, ballImage)
+            btnClickEvent(batch, delta, ballBtn, ballImage)
+//            if(newCharacter!!.poop > 95) {
+//                poops.forEach { poop -> batch.draw(ballImage, poop.x, poop.y, 50f, 50f) }
+//                newCharacter!!.happy -= 20
+//                newCharacter!!.clean -= 20
+//                ispoop = true
+//                println("Poop!!!!!!!!")
+////                newCharacter!!.poop = 0
+//                poopLabel.txt = "Toilet : ${newCharacter!!.poop}"
+//                cleanLabel.txt = "Clean : ${newCharacter!!.clean}"
+//                happyLabel.txt = "Happy : ${newCharacter!!.happy}  "
+//
+//            }
         }
+
+//        poops.iterate { poop, iterator ->
+//            if(Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) && ispoop){
+//                newCharacter!!.happy += 1
+//                iterator.remove()
+//                happyLabel.txt = "Happy : ${newCharacter!!.happy}  "
+//                if(poop == null) ispoop = false
+//            }
+//        }
 
         stage.draw()
 
@@ -650,7 +748,7 @@ class Game(
         moveToCreature(delta, badCookieBtn)
         moveToCreature(delta, goodCookieBtn)
 
-        moveToCreature(delta, bathBtn)
+//        moveToCreature(delta, bathBtn)
         moveToCreature(delta, toiletBtn)
 //        moveToCreature(delta, ballBtn)
 
@@ -667,6 +765,8 @@ class Game(
         }
         character.x = MathUtils.clamp(character.x, 20f, 800f - 80f)
 
+
+        newCharacter!!.moral = MathUtils.clamp(newCharacter!!.moral, 0, 500)
         saveDataInPreferences(preferences, newPlayer!!, newCharacter!!, foodNum!!)
     }
 }
